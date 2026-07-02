@@ -1,0 +1,10 @@
+# Copy this file to android/local.properties and set your actual Flutter
+# SDK path. This file is gitignored — everyone building the project needs
+# their own copy pointing at wherever `flutter` is installed locally.
+#
+# In Termux, after installing Flutter (see README.md), this is typically:
+flutter.sdk=/data/data/com.termux/files/home/flutter
+
+# These two are auto-managed by Flutter tooling; safe to leave as-is.
+flutter.versionCode=1
+flutter.versionName=1.0.0
