@@ -129,6 +129,12 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 final _meProvider = FutureProvider((ref) async {
+  // Watching authIdentityProvider (not just calling usersRepositoryProvider)
+  // is what makes this provider correctly refetch when the signed-in user
+  // changes — Riverpod re-runs this builder whenever the watched identity
+  // changes, discarding any previously cached user data from a prior
+  // session instead of serving it stale.
+  ref.watch(authIdentityProvider);
   final repo = ref.watch(usersRepositoryProvider);
   return repo.me();
 });

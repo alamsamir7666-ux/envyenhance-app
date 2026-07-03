@@ -6,6 +6,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 
 final loyaltyStatusProvider = FutureProvider((ref) async {
+  ref.watch(authIdentityProvider);
   final repo = ref.watch(loyaltyRepositoryProvider);
   return repo.myStatus();
 });

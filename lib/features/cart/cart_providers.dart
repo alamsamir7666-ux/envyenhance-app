@@ -11,6 +11,11 @@ import '../../core/providers.dart';
 class CartNotifier extends AsyncNotifier<Cart> {
   @override
   Future<Cart> build() async {
+    // Watching authIdentityProvider here means this whole notifier is
+    // torn down and rebuilt from scratch whenever the signed-in user
+    // changes, so a freshly-fetched cart always replaces any cart data
+    // left over from a previous session.
+    ref.watch(authIdentityProvider);
     return _fetch();
   }
 

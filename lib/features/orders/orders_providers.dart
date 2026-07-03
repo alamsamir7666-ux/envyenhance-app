@@ -3,11 +3,13 @@ import '../../core/models/order.dart';
 import '../../core/providers.dart';
 
 final myOrdersProvider = FutureProvider<List<Order>>((ref) async {
+  ref.watch(authIdentityProvider);
   final repo = ref.watch(ordersRepositoryProvider);
   return repo.myOrders();
 });
 
 final orderDetailProvider = FutureProvider.family<Order, int>((ref, orderId) async {
+  ref.watch(authIdentityProvider);
   final repo = ref.watch(ordersRepositoryProvider);
   return repo.getById(orderId);
 });

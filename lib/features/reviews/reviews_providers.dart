@@ -15,6 +15,7 @@ final productReviewsProvider =
 /// the review button just won't show for signed-out users.
 final reviewEligibilityProvider =
     FutureProvider.family<ReviewEligibility, int>((ref, productId) async {
+  ref.watch(authIdentityProvider);
   final repo = ref.watch(reviewsRepositoryProvider);
   try {
     return await repo.checkEligibility(productId);

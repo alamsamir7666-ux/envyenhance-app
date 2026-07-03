@@ -6,6 +6,7 @@ import '../../core/providers.dart';
 class WishlistNotifier extends AsyncNotifier<List<WishlistItem>> {
   @override
   Future<List<WishlistItem>> build() async {
+    ref.watch(authIdentityProvider);
     final repo = ref.read(wishlistRepositoryProvider);
     try {
       return await repo.getWishlist();
