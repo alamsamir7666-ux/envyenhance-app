@@ -27,7 +27,7 @@ class ClerkAuthServiceImpl extends AuthService {
   String? get userId => _authState.user?.id;
 
   @override
-  String? get email => _authState.user?.primaryEmailAddress?.emailAddress;
+  String? get email => _authState.user?.email;
 
   @override
   String? get firstName => _authState.user?.firstName;
@@ -38,7 +38,7 @@ class ClerkAuthServiceImpl extends AuthService {
   @override
   Future<String?> getToken() async {
     if (!isSignedIn) return null;
-    return _authState.session?.getToken();
+    return _authState.session?.lastActiveToken?.jwt;
   }
 
   @override

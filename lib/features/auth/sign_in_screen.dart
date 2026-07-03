@@ -4,15 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 
 /// Sign-in / sign-up screen. Delegates the actual auth UI to Clerk's
-/// pre-built `ClerkAuthentication` widget so we inherit Clerk's handling
-/// of email/password, verification codes, social providers (whatever is
-/// enabled in the Clerk dashboard for this project), and error states —
-/// rather than re-implementing auth forms by hand.
-///
-/// NOTE: `ClerkAuthentication` is the expected widget name in
-/// `clerk_flutter`, but if the installed version exposes a different
-/// widget (check pub.dev for the current version), swap it in here —
-/// this screen is the only place that needs to change.
+/// pre-built `ClerkAuthentication` widget. `ClerkAuthentication` has no
+/// sign-in-complete callback, so we wrap it in `ClerkAuthBuilder` and
+/// react when `signedInBuilder` fires (i.e. a Clerk user becomes
+/// available) to navigate away.
 class SignInScreen extends StatelessWidget {
   const SignInScreen({this.redirectTo, super.key});
 
@@ -51,14 +46,24 @@ class SignInScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ClerkAuthentication(
-                onSignInComplete: (context) {
-                  if (redirectTo != null) {
-                    context.go(redirectTo!);
-                  } else {
-                    context.go('/');
-                  }
+              child: ClerkAuthBuilder(
+                signedInBuilder: (context, authState) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!context.mounted) return;
+                    if (redirectTo != null) {
+                      context.go(redirectTo!);
+                    } else {
+                      context.go('/');
+                    }
+                  });
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
                 },
+                signedOutBuilder: (context, authState) => const ClerkAuthentication(),
+                builder: (context, authState) => const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
               ),
             ),
           ],
