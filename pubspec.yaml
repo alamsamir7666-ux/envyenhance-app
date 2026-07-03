@@ -18,9 +18,6 @@ dependencies:
   # Routing
   go_router: ^14.2.0
 
-  # Auth - Clerk
-  clerk_flutter: ^0.0.15
-
   # Networking
   dio: ^5.4.3+1
 

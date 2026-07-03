@@ -34,8 +34,7 @@ jobs:
       - name: Build release APK
         run: |
           flutter build apk --release --split-per-abi \
-            --dart-define=API_BASE_URL=https://envyenhance-api-9j77.onrender.com \
-            --dart-define=CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}
+            --dart-define=API_BASE_URL=https://envyenhance-api-9j77.onrender.com
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
-/// Abstraction over the auth provider (Clerk) so the rest of the app
-/// never touches the Clerk SDK directly. This makes it easy to patch if
-/// the Clerk Flutter package's exact API differs from what's written
-/// here — only this file (and clerk_auth_service.dart) would need edits.
+/// Abstraction over the auth backend so the rest of the app never touches
+/// networking or storage details directly. See MobileAuthServiceImpl for
+/// the concrete implementation, which talks to our own backend's
+/// `/api/mobile-auth/*` endpoints (themselves backed by Clerk server-side).
 abstract class AuthService extends ChangeNotifier {
   bool get isSignedIn;
   String? get userId; // Clerk user id
