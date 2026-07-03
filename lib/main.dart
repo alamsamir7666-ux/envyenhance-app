@@ -7,8 +7,10 @@ import 'core/config.dart';
 import 'core/providers.dart';
 import 'core/router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/update/update_providers.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const _AppBootstrap());
 }
 
@@ -49,11 +51,28 @@ class _AppBootstrapState extends State<_AppBootstrap> {
   }
 }
 
-class EnvyEnhanceApp extends ConsumerWidget {
+class EnvyEnhanceApp extends ConsumerStatefulWidget {
   const EnvyEnhanceApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EnvyEnhanceApp> createState() => _EnvyEnhanceAppState();
+}
+
+class _EnvyEnhanceAppState extends ConsumerState<EnvyEnhanceApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Fire-and-forget: check for an update once, after the first frame, so
+    // it never delays app startup or blocks the UI thread. Failures are
+    // swallowed inside UpdateService itself — this is a background nicety,
+    // not something that should ever interrupt the shopping experience.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(updateServiceProvider).checkForUpdate();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(

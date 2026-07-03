@@ -5,6 +5,7 @@ import '../../core/auth/auth_service.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/async_states.dart';
+import 'update_card.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -16,12 +17,19 @@ class ProfileScreen extends ConsumerWidget {
     if (!auth.isSignedIn) {
       return Scaffold(
         appBar: AppBar(title: const Text('Profile')),
-        body: EmptyView(
-          icon: Icons.person_outline,
-          title: 'You\'re not signed in',
-          subtitle: 'Sign in to view your profile, orders, and rewards.',
-          actionLabel: 'Sign In',
-          onAction: () => context.push('/sign-in'),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            EmptyView(
+              icon: Icons.person_outline,
+              title: 'You\'re not signed in',
+              subtitle: 'Sign in to view your profile, orders, and rewards.',
+              actionLabel: 'Sign In',
+              onAction: () => context.push('/sign-in'),
+            ),
+            const SizedBox(height: 24),
+            const UpdateCard(),
+          ],
         ),
       );
     }
@@ -93,6 +101,8 @@ class ProfileScreen extends ConsumerWidget {
                 },
               ),
               const Divider(height: 32),
+              const UpdateCard(),
+              const SizedBox(height: 24),
               _MenuTile(
                 icon: Icons.logout,
                 label: 'Sign Out',

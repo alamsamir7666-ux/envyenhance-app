@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Required: all API calls to Render, image loads from Cloudinary -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required: lets the app prompt Android's installer for self-updates -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:label="EnvyEnhance"
