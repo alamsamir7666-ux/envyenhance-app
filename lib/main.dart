@@ -42,7 +42,7 @@ class _AppBootstrapState extends State<_AppBootstrap> {
   Widget build(BuildContext context) {
     return ProviderScope(
       overrides: [
-        authServiceProvider.overrideWithValue(_authService),
+        authServiceProvider.overrideWith((ref) => _authService),
       ],
       child: const EnvyEnhanceApp(),
     );
