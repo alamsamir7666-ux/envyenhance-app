@@ -33,7 +33,7 @@ jobs:
 
       - name: Build release APK
         run: |
-          flutter build apk --release \
+          flutter build apk --release --split-per-abi \
             --dart-define=API_BASE_URL=https://envyenhance-api-9j77.onrender.com \
             --dart-define=CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}
 
@@ -41,5 +41,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: envyenhance-app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/*.apk
           retention-days: 30
