@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/models/subscription.dart';
 import '../../core/providers.dart';
 import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
@@ -91,7 +90,7 @@ class _SubscriptionDetailScreenState extends ConsumerState<SubscriptionDetailScr
                     ),
                     if (sub.isActive) ...[
                       const SizedBox(height: 8),
-                      Text('Next order: ${formatDate(sub.nextOrderDate)}'),
+                      Text('Next order: ${formatDateTime(sub.nextOrderDate)}'),
                     ],
                     if (sub.orderCount > 0) ...[
                       const SizedBox(height: 4),

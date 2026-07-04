@@ -30,3 +30,15 @@ String formatDate(String isoString) {
     return isoString;
   }
 }
+
+/// Same formatting as [formatDate], but for callers that already have a
+/// parsed DateTime (e.g. models that eagerly parse ISO strings in their
+/// fromJson constructors) rather than a raw ISO string.
+String formatDateTime(DateTime date) {
+  final local = date.toLocal();
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  return '${local.day} ${months[local.month - 1]} ${local.year}';
+}

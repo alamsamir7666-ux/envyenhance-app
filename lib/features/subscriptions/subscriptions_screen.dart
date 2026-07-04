@@ -91,7 +91,7 @@ class SubscriptionsScreen extends ConsumerWidget {
                             ),
                             if (sub.isActive)
                               Text(
-                                'Next: ${formatDate(sub.nextOrderDate)}',
+                                'Next: ${formatDateTime(sub.nextOrderDate)}',
                                 style: theme.textTheme.bodyMedium,
                               ),
                           ],

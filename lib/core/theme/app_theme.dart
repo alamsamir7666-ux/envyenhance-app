@@ -42,7 +42,7 @@ class AppTheme {
 
     final base = ThemeData(useMaterial3: true, colorScheme: colorScheme, brightness: brightness);
 
-    final serif = GoogleFonts.dmSerifDisplayTextStyle();
+    final serif = GoogleFonts.dmSerifDisplay();
     final sansTextTheme = GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
       // The one serif moment: display/headline roles only. Everything
       // else — titles, body, labels — stays DM Sans so the serif reads

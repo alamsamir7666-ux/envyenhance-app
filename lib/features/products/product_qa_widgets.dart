@@ -108,7 +108,7 @@ class _QuestionTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(formatDate(question.createdAt), style: theme.textTheme.bodyMedium),
+          Text(formatDateTime(question.createdAt), style: theme.textTheme.bodyMedium),
           if (question.isAnswered) ...[
             const SizedBox(height: 10),
             Row(
