@@ -55,3 +55,12 @@
 -keepclasseswithmembers class * {
     @androidx.annotation.Keep <methods>;
 }
+
+# ── Flutter Play Store deferred components (unused) ────────────────────
+# Flutter's engine has optional support for Play Store dynamic feature
+# delivery via com.google.android.play.core.*, which requires an extra
+# dependency we don't include since this app doesn't use deferred
+# components. R8 correctly detects these classes are missing; they're
+# safe to ignore since that code path is never invoked at runtime.
+-dontwarn com.google.android.play.core.**
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
