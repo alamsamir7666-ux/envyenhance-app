@@ -1,8 +1,8 @@
 {
-  "versionName": "1.2.0",
-  "versionCode": 4,
+  "versionName": "1.3.0",
+  "versionCode": 5,
   "releaseNotes": "See the GitHub Release for full notes.",
   "minSupportedVersionCode": 1,
-  "apkUrl": "https://github.com/alamsamir7666-ux/envyenhance-app/releases/download/v1.2.0/app-arm64-v8a-release.apk",
-  "apkSha256": "fc100535668ae8685697d27b15591b5cbf59b3f94b2a2cbb8c09ba4c59934e68"
+  "apkUrl": "https://github.com/alamsamir7666-ux/envyenhance-app/releases/download/v1.3.0/app-arm64-v8a-release.apk",
+  "apkSha256": "70de96dc94bdf616d442f13d5aa962eeda7a240958dd7057c11be79588f1289d"
 }
