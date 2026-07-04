@@ -2,14 +2,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/product.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 import '../cart/cart_providers.dart';
 import '../reviews/review_widgets.dart';
-import '../reviews/reviews_providers.dart';
 import '../wishlist/wishlist_providers.dart';
 import 'product_detail_providers.dart';
+import 'product_qa_widgets.dart';
+import 'stock_alert_button.dart';
 
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({required this.productId, super.key});
@@ -28,6 +29,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final productAsync = ref.watch(productDetailProvider(widget.productId));
     final wishlistIds = ref.watch(wishlistProductIdsProvider);
     final isWishlisted = wishlistIds.contains(widget.productId);
+    final theme = Theme.of(context);
+    final brand = context.brand;
 
     return Scaffold(
       body: productAsync.when(
@@ -42,13 +45,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               SliverAppBar(
                 pinned: true,
                 expandedHeight: 340,
-                backgroundColor: AppColors.background,
-                foregroundColor: AppColors.textPrimary,
+                backgroundColor: theme.scaffoldBackgroundColor,
+                foregroundColor: theme.colorScheme.onSurface,
                 actions: [
                   IconButton(
                     icon: Icon(
                       isWishlisted ? Icons.favorite : Icons.favorite_border,
-                      color: isWishlisted ? AppColors.error : null,
+                      color: isWishlisted ? theme.colorScheme.error : null,
                     ),
                     onPressed: () => ref.read(wishlistProvider.notifier).toggle(product.id),
                   ),
@@ -68,23 +71,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(product.category.toUpperCase(),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.accent,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                                color: brand.gold,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.5,
                               )),
                       const SizedBox(height: 4),
-                      Text(product.name, style: Theme.of(context).textTheme.headlineMedium),
+                      // The one serif moment for this screen, per the
+                      // design plan — the product name itself.
+                      Text(product.name, style: theme.textTheme.displaySmall),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.star, size: 18, color: AppColors.accent),
+                          Icon(Icons.star, size: 18, color: brand.gold),
                           const SizedBox(width: 4),
-                          Text('${product.averageRating}',
-                              style: Theme.of(context).textTheme.bodyLarge),
+                          Text('${product.averageRating}', style: theme.textTheme.bodyLarge),
                           const SizedBox(width: 4),
-                          Text('(${product.reviewCount} reviews)',
-                              style: Theme.of(context).textTheme.bodyMedium),
+                          Text('(${product.reviewCount} reviews)', style: theme.textTheme.bodyMedium),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -93,9 +96,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         children: [
                           Text(
                             formatTaka(product.effectivePrice),
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: AppColors.primary,
-                                ),
+                            style: theme.textTheme.headlineMedium?.copyWith(color: brand.gold),
                           ),
                           if (product.isOnSale) ...[
                             const SizedBox(width: 10),
@@ -103,7 +104,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Text(
                                 formatTaka(product.price),
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                style: theme.textTheme.bodyLarge?.copyWith(
                                       decoration: TextDecoration.lineThrough,
                                     ),
                               ),
@@ -114,41 +115,44 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         product.inStock ? 'In stock (${product.stock} left)' : 'Out of stock',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: product.inStock ? AppColors.success : AppColors.error,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                              color: product.inStock ? brand.sage : theme.colorScheme.error,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
+                      if (!product.inStock) ...[
+                        const SizedBox(height: 12),
+                        StockAlertButton(productId: product.id),
+                      ],
                       const Divider(height: 32),
-                      Text('Description', style: Theme.of(context).textTheme.titleLarge),
+                      Text('Description', style: theme.textTheme.titleLarge),
                       const SizedBox(height: 8),
-                      Text(product.description, style: Theme.of(context).textTheme.bodyLarge),
+                      Text(product.description, style: theme.textTheme.bodyLarge),
                       if (product.keyBenefits.isNotEmpty) ...[
                         const SizedBox(height: 20),
-                        Text('Key Benefits', style: Theme.of(context).textTheme.titleLarge),
-                        const SizedBox(height: 8),
-                        ...product.keyBenefits.map(
-                          (b) => Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.check_circle, size: 18, color: AppColors.success),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text(b, style: Theme.of(context).textTheme.bodyLarge)),
-                              ],
-                            ),
-                          ),
+                        Text('Key Benefits', style: theme.textTheme.titleLarge),
+                        const SizedBox(height: 10),
+                        // Soft rose chips per the design plan, rather than
+                        // a plain checkmark list.
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final b in product.keyBenefits)
+                              Chip(label: Text(b)),
+                          ],
                         ),
                       ],
                       if (product.ingredients != null && product.ingredients!.isNotEmpty) ...[
                         const SizedBox(height: 20),
-                        Text('Ingredients', style: Theme.of(context).textTheme.titleLarge),
+                        Text('Ingredients', style: theme.textTheme.titleLarge),
                         const SizedBox(height: 8),
-                        Text(product.ingredients!, style: Theme.of(context).textTheme.bodyLarge),
+                        Text(product.ingredients!, style: theme.textTheme.bodyLarge),
                       ],
                       const Divider(height: 32),
                       ProductReviewsSection(productId: product.id),
+                      const Divider(height: 32),
+                      ProductQASection(productId: product.id),
                     ],
                   ),
                 ),
@@ -182,10 +186,11 @@ class _ImageCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = context.brand;
     if (images.isEmpty) {
       return Container(
-        color: AppColors.primaryLight,
-        child: const Icon(Icons.image_not_supported_outlined, size: 64, color: AppColors.textSecondary),
+        color: brand.roseSurface,
+        child: Icon(Icons.image_not_supported_outlined, size: 64, color: brand.textSecondary),
       );
     }
     return Stack(
@@ -240,13 +245,14 @@ class _AddToCartBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartState = ref.watch(cartProvider);
     final isAdding = cartState.isLoading;
+    final theme = Theme.of(context);
 
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.divider)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          border: Border(top: BorderSide(color: theme.dividerColor)),
         ),
         child: Row(
           children: [
@@ -309,7 +315,7 @@ class _QuantityStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

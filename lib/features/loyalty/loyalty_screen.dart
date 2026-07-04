@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 
@@ -17,6 +17,9 @@ class LoyaltyScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loyaltyAsync = ref.watch(loyaltyStatusProvider);
+    final brand = context.brand;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Loyalty Points')),
@@ -28,7 +31,7 @@ class LoyaltyScreen extends ConsumerWidget {
         ),
         data: (status) {
           return RefreshIndicator(
-            color: AppColors.primary,
+            color: brand.gold,
             onRefresh: () async => ref.invalidate(loyaltyStatusProvider),
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -36,8 +39,10 @@ class LoyaltyScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, Color(0xFF8F4460)],
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [const Color(0xFF23201C), const Color(0xFF3A2B2E)]
+                          : [const Color(0xFF2E2724), const Color(0xFF4A3630)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -53,8 +58,8 @@ class LoyaltyScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(
                         '${status.points} points',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: brand.gold,
                           fontSize: 32,
                           fontWeight: FontWeight.w700,
                         ),
@@ -71,31 +76,31 @@ class LoyaltyScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withOpacity(0.4),
+                    color: brand.roseSurface.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                      Icon(Icons.info_outline, color: brand.roseText, size: 20),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Earn 1 point for every ৳100 you spend. 1 point = ৳1 off your next order.',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: theme.textTheme.bodyMedium,
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('History', style: Theme.of(context).textTheme.titleLarge),
+                Text('History', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 8),
                 if (status.transactions.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Text(
                       'No transactions yet.',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                     ),
                   )
                 else
@@ -103,23 +108,23 @@ class LoyaltyScreen extends ConsumerWidget {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor:
-                            tx.isEarned ? AppColors.success.withOpacity(0.15) : AppColors.error.withOpacity(0.15),
+                        backgroundColor: (tx.isEarned ? brand.sage : theme.colorScheme.error)
+                            .withValues(alpha: 0.15),
                         child: Icon(
                           tx.isEarned ? Icons.add : Icons.remove,
-                          color: tx.isEarned ? AppColors.success : AppColors.error,
+                          color: tx.isEarned ? brand.sage : theme.colorScheme.error,
                           size: 18,
                         ),
                       ),
                       title: Text(
                         tx.orderId != null ? 'Order #${tx.orderId}' : tx.reason,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: theme.textTheme.bodyLarge,
                       ),
                       subtitle: Text(formatDate(tx.createdAt)),
                       trailing: Text(
                         '${tx.isEarned ? '+' : ''}${tx.points}',
                         style: TextStyle(
-                          color: tx.isEarned ? AppColors.success : AppColors.error,
+                          color: tx.isEarned ? brand.sage : theme.colorScheme.error,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

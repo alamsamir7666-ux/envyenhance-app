@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/order.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/widgets/app_badge.dart';
 import '../../core/widgets/async_states.dart';
 import 'orders_providers.dart';
 
@@ -33,7 +34,7 @@ class OrdersScreen extends ConsumerWidget {
             );
           }
           return RefreshIndicator(
-            color: AppColors.primary,
+            color: context.brand.gold,
             onRefresh: () async => ref.invalidate(myOrdersProvider),
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -52,28 +53,32 @@ class _OrderTile extends StatelessWidget {
   const _OrderTile({required this.order});
   final Order order;
 
-  Color _statusColor() {
+  Color _statusColor(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
     switch (order.orderStatus) {
       case 'delivered':
-        return AppColors.success;
+        return brand.sage;
       case 'cancelled':
-        return AppColors.error;
+        return theme.colorScheme.error;
       default:
-        return AppColors.accent;
+        return brand.gold;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final statusColor = _statusColor(context);
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: () => context.push('/orders/${order.id}'),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,27 +88,21 @@ class _OrderTile extends StatelessWidget {
               children: [
                 Text(
                   '#${order.trackingId}',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: _statusColor().withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    order.orderStatus.toUpperCase(),
-                    style: TextStyle(color: _statusColor(), fontWeight: FontWeight.w700, fontSize: 11),
-                  ),
+                AppBadge.soft(
+                  text: order.orderStatus.toUpperCase(),
+                  color: statusColor,
+                  textColor: statusColor,
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            Text(formatDate(order.createdAt), style: Theme.of(context).textTheme.bodyMedium),
+            Text(formatDate(order.createdAt), style: theme.textTheme.bodyMedium),
             const SizedBox(height: 6),
             Text(
               '${order.items.length} item${order.items.length == 1 ? '' : 's'} · ${formatTaka(order.totalAmount)}',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge,
             ),
           ],
         ),

@@ -1,11 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api/api_client.dart';
+import 'api/blog_repository.dart';
 import 'api/cart_repository.dart';
+import 'api/coupons_repository.dart';
+import 'api/gift_cards_repository.dart';
 import 'api/loyalty_repository.dart';
 import 'api/misc_repository.dart';
 import 'api/orders_repository.dart';
+import 'api/pre_orders_repository.dart';
+import 'api/product_qa_repository.dart';
 import 'api/products_repository.dart';
+import 'api/referrals_repository.dart';
+import 'api/returns_repository.dart';
 import 'api/reviews_repository.dart';
+import 'api/skin_profile_repository.dart';
+import 'api/stock_alerts_repository.dart';
+import 'api/subscriptions_repository.dart';
 import 'api/wishlist_repository.dart';
 import 'auth/auth_service.dart';
 
@@ -76,4 +86,44 @@ final categoriesRepositoryProvider = Provider<CategoriesRepository>((ref) {
 
 final usersRepositoryProvider = Provider<UsersRepository>((ref) {
   return UsersRepository(ref.watch(apiClientProvider));
+});
+
+final couponsRepositoryProvider = Provider<CouponsRepository>((ref) {
+  return CouponsRepository(ref.watch(apiClientProvider));
+});
+
+final giftCardsRepositoryProvider = Provider<GiftCardsRepository>((ref) {
+  return GiftCardsRepository(ref.watch(apiClientProvider));
+});
+
+final subscriptionsRepositoryProvider = Provider<SubscriptionsRepository>((ref) {
+  return SubscriptionsRepository(ref.watch(apiClientProvider));
+});
+
+final skinProfileRepositoryProvider = Provider<SkinProfileRepository>((ref) {
+  return SkinProfileRepository(ref.watch(apiClientProvider));
+});
+
+final referralsRepositoryProvider = Provider<ReferralsRepository>((ref) {
+  return ReferralsRepository(ref.watch(apiClientProvider));
+});
+
+final stockAlertsRepositoryProvider = Provider<StockAlertsRepository>((ref) {
+  return StockAlertsRepository(ref.watch(apiClientProvider));
+});
+
+final productQARepositoryProvider = Provider<ProductQARepository>((ref) {
+  return ProductQARepository(ref.watch(apiClientProvider));
+});
+
+final blogRepositoryProvider = Provider<BlogRepository>((ref) {
+  return BlogRepository(ref.watch(apiClientProvider));
+});
+
+final preOrdersRepositoryProvider = Provider<PreOrdersRepository>((ref) {
+  return PreOrdersRepository(ref.watch(apiClientProvider));
+});
+
+final returnsRepositoryProvider = Provider<ReturnsRepository>((ref) {
+  return ReturnsRepository(ref.watch(apiClientProvider));
 });

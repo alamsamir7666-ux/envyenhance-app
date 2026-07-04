@@ -1,13 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
-import '../models/product.dart';
-import '../theme/app_theme.dart';
-import '../utils/formatters.dart';
 
-/// Standard product card for grids (home sections, browse, search results).
-/// Tapping navigates to the product detail screen.
+import '../models/product.dart';
+import '../theme/app_brand_colors.dart';
+import '../utils/formatters.dart';
+import 'app_badge.dart';
+import 'app_skeleton.dart';
+
+/// Standard product card for grids (home sections, browse, search
+/// results). Tapping navigates to the product detail screen.
 class ProductCard extends StatelessWidget {
   const ProductCard({
     required this.product,
@@ -22,6 +24,9 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
+
     return Semantics(
       button: true,
       label: '${product.name}, ${formatTaka(product.effectivePrice)}',
@@ -30,9 +35,9 @@ class ProductCard extends StatelessWidget {
         onTap: () => context.push('/products/${product.id}'),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: theme.dividerColor),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -47,17 +52,17 @@ class ProductCard extends StatelessWidget {
                       Positioned(
                         top: 8,
                         left: 8,
-                        child: _Badge(
+                        child: AppBadge.solid(
                           text:
                               '-${(((product.price - product.discountPrice!) / product.price) * 100).round()}%',
-                          color: AppColors.error,
+                          color: theme.colorScheme.error,
                         ),
                       ),
                     if (!product.inStock)
                       Positioned(
                         top: 8,
                         left: 8,
-                        child: _Badge(text: 'Sold out', color: AppColors.textSecondary),
+                        child: AppBadge.solid(text: 'Sold out', color: brand.textSecondary),
                       ),
                     if (onWishlistToggle != null)
                       Positioned(
@@ -66,11 +71,9 @@ class ProductCard extends StatelessWidget {
                         child: IconButton(
                           icon: Icon(
                             isWishlisted ? Icons.favorite : Icons.favorite_border,
-                            color: isWishlisted ? AppColors.error : Colors.white,
+                            color: isWishlisted ? theme.colorScheme.error : Colors.white,
                           ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.black26,
-                          ),
+                          style: IconButton.styleFrom(backgroundColor: Colors.black26),
                           onPressed: onWishlistToggle,
                           tooltip: isWishlisted ? 'Remove from wishlist' : 'Add to wishlist',
                         ),
@@ -87,19 +90,17 @@ class ProductCard extends StatelessWidget {
                       product.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 2),
                     if (product.reviewCount > 0)
                       Row(
                         children: [
-                          const Icon(Icons.star, size: 14, color: AppColors.accent),
+                          Icon(Icons.star, size: 14, color: brand.gold),
                           const SizedBox(width: 2),
                           Text(
                             '${product.averageRating} (${product.reviewCount})',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: theme.textTheme.bodyMedium,
                           ),
                         ],
                       ),
@@ -108,18 +109,18 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Text(
                           formatTaka(product.effectivePrice),
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primary,
-                              ),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: brand.gold,
+                          ),
                         ),
                         if (product.isOnSale) ...[
                           const SizedBox(width: 6),
                           Text(
                             formatTaka(product.price),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  decoration: TextDecoration.lineThrough,
-                                ),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              decoration: TextDecoration.lineThrough,
+                            ),
                           ),
                         ],
                       ],
@@ -141,48 +142,20 @@ class _ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = context.brand;
     if (url.isEmpty) {
       return Container(
-        color: AppColors.primaryLight,
-        child: const Icon(Icons.image_not_supported_outlined, color: AppColors.textSecondary),
+        color: brand.roseSurface,
+        child: Icon(Icons.image_not_supported_outlined, color: brand.textSecondary),
       );
     }
     return CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
-      placeholder: (context, _) => Shimmer.fromColors(
-        baseColor: AppColors.divider,
-        highlightColor: AppColors.primaryLight,
-        child: Container(color: Colors.white),
-      ),
+      placeholder: (context, _) => const AppShimmer(child: ColoredBox(color: Colors.white)),
       errorWidget: (context, _, __) => Container(
-        color: AppColors.primaryLight,
-        child: const Icon(Icons.broken_image_outlined, color: AppColors.textSecondary),
-      ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  const _Badge({required this.text, required this.color});
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
+        color: brand.roseSurface,
+        child: Icon(Icons.broken_image_outlined, color: brand.textSecondary),
       ),
     );
   }

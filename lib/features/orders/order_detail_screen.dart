@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/order.dart';
 import '../../core/providers.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
+import '../returns/returns_screen.dart';
 import 'orders_providers.dart';
 
 class OrderDetailScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class OrderDetailScreen extends ConsumerWidget {
   final int orderId;
 
   Future<void> _confirmCancel(BuildContext context, WidgetRef ref) async {
+    final errorColor = Theme.of(context).colorScheme.error;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -21,7 +23,7 @@ class OrderDetailScreen extends ConsumerWidget {
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep order')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Cancel order', style: TextStyle(color: AppColors.error)),
+            child: Text('Cancel order', style: TextStyle(color: errorColor)),
           ),
         ],
       ),
@@ -47,6 +49,8 @@ class OrderDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orderAsync = ref.watch(orderDetailProvider(orderId));
+    final theme = Theme.of(context);
+    final brand = context.brand;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Order Details')),
@@ -63,46 +67,46 @@ class OrderDetailScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: theme.cardTheme.color,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.divider),
+                  border: Border.all(color: theme.dividerColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Order #${order.trackingId}', style: Theme.of(context).textTheme.titleLarge),
+                    Text('Order #${order.trackingId}', style: theme.textTheme.titleLarge),
                     const SizedBox(height: 4),
-                    Text(formatDate(order.createdAt), style: Theme.of(context).textTheme.bodyMedium),
+                    Text(formatDate(order.createdAt), style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 8),
                     Text(
                       'Status: ${order.orderStatus.toUpperCase()}',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       'Payment: ${order.paymentMethod.toUpperCase()} (${order.paymentStatus})',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Items', style: Theme.of(context).textTheme.titleLarge),
+              Text('Items', style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
               for (final item in order.items) _OrderItemTile(item: item),
               const SizedBox(height: 16),
-              Text('Shipping Address', style: Theme.of(context).textTheme.titleLarge),
+              Text('Shipping Address', style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
-              Text(order.shippingAddress.fullName, style: Theme.of(context).textTheme.bodyLarge),
-              Text(order.shippingAddress.phone, style: Theme.of(context).textTheme.bodyMedium),
+              Text(order.shippingAddress.fullName, style: theme.textTheme.bodyLarge),
+              Text(order.shippingAddress.phone, style: theme.textTheme.bodyMedium),
               Text(
                 '${order.shippingAddress.street}, ${order.shippingAddress.city}',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.4),
+                  color: brand.roseSurface.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -118,10 +122,10 @@ class OrderDetailScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Total', style: Theme.of(context).textTheme.titleLarge),
+                        Text('Total', style: theme.textTheme.titleLarge),
                         Text(
                           formatTaka(order.totalAmount),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.primary),
+                          style: theme.textTheme.titleLarge?.copyWith(color: brand.gold),
                         ),
                       ],
                     ),
@@ -135,10 +139,20 @@ class OrderDetailScreen extends ConsumerWidget {
                   child: OutlinedButton(
                     onPressed: () => _confirmCancel(context, ref),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error),
+                      foregroundColor: theme.colorScheme.error,
+                      side: BorderSide(color: theme.colorScheme.error),
                     ),
                     child: const Text('Cancel Order'),
+                  ),
+                ),
+              ],
+              if (order.orderStatus == 'delivered') ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => showRequestReturnDialog(context, ref, orderId: order.id),
+                    child: const Text('Request a Return'),
                   ),
                 ),
               ],
@@ -156,6 +170,7 @@ class _OrderItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = context.brand;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -170,7 +185,7 @@ class _OrderItemTile extends StatelessWidget {
               errorBuilder: (_, __, ___) => Container(
                 width: 56,
                 height: 56,
-                color: AppColors.primaryLight,
+                color: brand.roseSurface,
               ),
             ),
           ),

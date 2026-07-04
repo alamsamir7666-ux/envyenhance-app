@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/misc.dart';
 import '../../core/models/product.dart';
-import '../../core/providers.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/widgets/async_states.dart';
 import '../../core/widgets/product_card.dart';
+import '../../core/widgets/section_header.dart';
 import '../wishlist/wishlist_providers.dart';
 import 'home_providers.dart';
 
@@ -31,7 +31,7 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.primary,
+        color: context.brand.gold,
         onRefresh: () async {
           ref.invalidate(homepageSectionsProvider);
           ref.invalidate(homeCategoriesProvider);
@@ -86,12 +86,17 @@ class HomeScreen extends ConsumerWidget {
 class _HeroBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF8F4460)],
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF23201C), const Color(0xFF3A2B2E)]
+              : [const Color(0xFF2E2724), const Color(0xFF4A3630)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -102,18 +107,18 @@ class _HeroBanner extends StatelessWidget {
         children: [
           Text(
             'Glow from within',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white),
+            style: theme.textTheme.displaySmall?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 6),
           Text(
-            'Discover skincare made for you',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+            'Authentic Japanese skincare, made for you',
+            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
+              backgroundColor: brand.gold,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => context.push('/products'),
             child: const Text('Shop Now'),
@@ -131,6 +136,7 @@ class _CategoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox.shrink();
+    final brand = context.brand;
     return SizedBox(
       height: 96,
       child: ListView.separated(
@@ -149,12 +155,12 @@ class _CategoryRow extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: AppColors.primaryLight,
+                    backgroundColor: brand.roseSurface,
                     backgroundImage: cat.image != null && cat.image!.isNotEmpty
                         ? NetworkImage(cat.image!)
                         : null,
                     child: cat.image == null || cat.image!.isEmpty
-                        ? const Icon(Icons.spa_outlined, color: AppColors.primary)
+                        ? Icon(Icons.spa_outlined, color: brand.roseText)
                         : null,
                   ),
                   const SizedBox(height: 6),
@@ -189,15 +195,11 @@ class _ProductSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-          ),
-          const SizedBox(height: 12),
+          SectionHeader(title: title),
           SizedBox(
             height: 260,
             child: ListView.separated(

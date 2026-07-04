@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'auth/auth_service.dart';
 import 'providers.dart';
 import 'widgets/app_shell.dart';
 import '../features/auth/sign_in_screen.dart';
@@ -15,6 +13,15 @@ import '../features/orders/order_detail_screen.dart';
 import '../features/wishlist/wishlist_screen.dart';
 import '../features/loyalty/loyalty_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/gift_cards/gift_cards_screen.dart';
+import '../features/subscriptions/subscriptions_screen.dart';
+import '../features/subscriptions/subscription_detail_screen.dart';
+import '../features/skin_profile/skin_quiz_screen.dart';
+import '../features/referrals/referrals_screen.dart';
+import '../features/blog/blog_list_screen.dart';
+import '../features/blog/blog_article_screen.dart';
+import '../features/pre_orders/pre_orders_screen.dart';
+import '../features/returns/returns_screen.dart';
 
 /// Routes that require a signed-in user. Anything not in this list is
 /// accessible to guests (browsing products, viewing product details).
@@ -25,6 +32,12 @@ const _protectedRoutes = [
   '/wishlist',
   '/loyalty',
   '/profile',
+  '/gift-cards',
+  '/subscriptions',
+  '/skin-quiz',
+  '/referrals',
+  '/pre-orders',
+  '/returns',
 ];
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -75,6 +88,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/loyalty', builder: (context, state) => const LoyaltyScreen()),
+      GoRoute(path: '/gift-cards', builder: (context, state) => const GiftCardsScreen()),
+      GoRoute(path: '/subscriptions', builder: (context, state) => const SubscriptionsScreen()),
+      GoRoute(
+        path: '/subscriptions/:id',
+        builder: (context, state) => SubscriptionDetailScreen(
+          subscriptionId: int.parse(state.pathParameters['id']!),
+        ),
+      ),
+      GoRoute(path: '/skin-quiz', builder: (context, state) => const SkinQuizScreen()),
+      GoRoute(path: '/referrals', builder: (context, state) => const ReferralsScreen()),
+      GoRoute(path: '/blog', builder: (context, state) => const BlogListScreen()),
+      GoRoute(
+        path: '/blog/:slug',
+        builder: (context, state) => BlogArticleScreen(slug: state.pathParameters['slug']!),
+      ),
+      GoRoute(path: '/pre-orders', builder: (context, state) => const PreOrdersScreen()),
+      GoRoute(path: '/returns', builder: (context, state) => const ReturnsScreen()),
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => SignInScreen(

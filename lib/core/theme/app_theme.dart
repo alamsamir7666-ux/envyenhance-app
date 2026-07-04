@@ -1,123 +1,166 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// EnvyEnhance brand palette — warm blush/rose tones fitting a beauty &
-/// skincare e-commerce brand (sourced from the product's own naming:
-/// "sakura-beauty" in the codebase), rather than default Material colors.
-class AppColors {
-  AppColors._();
+import 'app_brand_colors.dart';
+import 'app_colors.dart';
 
-  static const Color primary = Color(0xFFB8577A); // deep rose
-  static const Color primaryLight = Color(0xFFF3D9E1); // blush
-  static const Color accent = Color(0xFFD4A574); // warm gold
-  static const Color background = Color(0xFFFFFBF9); // warm white
-  static const Color surface = Colors.white;
-  static const Color textPrimary = Color(0xFF2B1E22);
-  static const Color textSecondary = Color(0xFF8A7378);
-  static const Color success = Color(0xFF5B8A6E);
-  static const Color error = Color(0xFFC1483F);
-  static const Color divider = Color(0xFFF0E4E8);
-}
-
+/// Central theme builder for both light and dark modes.
+///
+/// Typography: DM Sans for body/UI, DM Serif Display for the "one serif
+/// moment" — product names, section headers, prices — per the design
+/// plan. Fetched at runtime via google_fonts (cached to disk after first
+/// launch) rather than bundled, to keep the APK smaller without a real
+/// UX cost after the first successful fetch.
 class AppTheme {
   AppTheme._();
 
-  static ThemeData light() {
-    final base = ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        primary: AppColors.primary,
-        surface: AppColors.surface,
-        error: AppColors.error,
-      ),
-      scaffoldBackgroundColor: AppColors.background,
+  static ThemeData light() => _build(brightness: Brightness.light);
+  static ThemeData dark() => _build(brightness: Brightness.dark);
+
+  static ThemeData _build({required Brightness brightness}) {
+    final isDark = brightness == Brightness.dark;
+
+    final backgroundColor = isDark ? AppColors.ink : AppColors.ivory;
+    final surfaceColor = isDark ? AppColors.darkSurface : Colors.white;
+    final primaryColor = isDark ? AppColors.parchment : AppColors.charcoal;
+    final onPrimaryColor = isDark ? AppColors.ink : Colors.white;
+    final textColor = isDark ? AppColors.parchment : AppColors.charcoal;
+    final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final brand = isDark ? AppBrandColors.dark : AppBrandColors.light;
+
+    final colorScheme = ColorScheme(
+      brightness: brightness,
+      primary: primaryColor,
+      onPrimary: onPrimaryColor,
+      secondary: brand.gold,
+      onSecondary: onPrimaryColor,
+      error: AppColors.errorRed,
+      onError: Colors.white,
+      surface: surfaceColor,
+      onSurface: textColor,
     );
 
-    final textTheme = GoogleFonts.interTextTheme(base.textTheme).copyWith(
-      displaySmall: GoogleFonts.playfairDisplay(
-        fontSize: 30,
+    final base = ThemeData(useMaterial3: true, colorScheme: colorScheme, brightness: brightness);
+
+    final serif = GoogleFonts.dmSerifDisplayTextStyle();
+    final sansTextTheme = GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
+      // The one serif moment: display/headline roles only. Everything
+      // else — titles, body, labels — stays DM Sans so the serif reads
+      // as a deliberate accent, not the default voice of the app.
+      displayLarge: serif.copyWith(fontSize: 34, color: textColor, height: 1.15),
+      displayMedium: serif.copyWith(fontSize: 28, color: textColor, height: 1.2),
+      displaySmall: serif.copyWith(fontSize: 24, color: textColor, height: 1.2),
+      headlineMedium: serif.copyWith(fontSize: 22, color: textColor, height: 1.25),
+      titleLarge: GoogleFonts.dmSans(
+        fontSize: 17,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: textColor,
       ),
-      headlineMedium: GoogleFonts.playfairDisplay(
-        fontSize: 24,
+      titleMedium: GoogleFonts.dmSans(
+        fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: textColor,
       ),
-      titleLarge: GoogleFonts.inter(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-      bodyLarge: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
-      bodyMedium: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+      bodyLarge: GoogleFonts.dmSans(fontSize: 15, color: textColor),
+      bodyMedium: GoogleFonts.dmSans(fontSize: 13.5, color: brand.textSecondary),
+      labelLarge: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600),
     );
 
     return base.copyWith(
-      textTheme: textTheme,
+      scaffoldBackgroundColor: backgroundColor,
+      textTheme: sansTextTheme,
+      extensions: [brand],
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: textTheme.titleLarge,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: sansTextTheme.titleLarge,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: primaryColor,
+          foregroundColor: onPrimaryColor,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w600, fontSize: 15),
           elevation: 0,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary),
+          foregroundColor: primaryColor,
+          side: BorderSide(color: primaryColor),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primaryColor,
+          textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w600, fontSize: 14),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: surfaceColor,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: borderColor),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: primaryColor, width: 1.5),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.errorRed),
+        ),
+        hintStyle: GoogleFonts.dmSans(color: brand.textSecondary),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surface,
+        color: surfaceColor,
         elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.divider),
+          side: BorderSide(color: borderColor),
         ),
       ),
-      dividerTheme: const DividerThemeData(color: AppColors.divider, thickness: 1),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8,
+      chipTheme: ChipThemeData(
+        backgroundColor: brand.roseSurface,
+        labelStyle: GoogleFonts.dmSans(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w500,
+          color: brand.roseText,
+        ),
+        side: BorderSide.none,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
+      dividerTheme: DividerThemeData(color: borderColor, thickness: 1),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surfaceColor,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: brand.textSecondary,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: GoogleFonts.dmSans(fontSize: 11),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: primaryColor,
+        contentTextStyle: GoogleFonts.dmSans(color: onPrimaryColor, fontSize: 14),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: brand.gold),
     );
   }
 }

@@ -50,8 +50,9 @@ android {
             // keystore (see android/key.properties.example) before
             // publishing to the Play Store.
             signingConfig signingConfigs.debug
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/api/coupons_repository.dart';
 import '../../core/models/cart.dart';
+import '../../core/models/coupon.dart';
 import '../../core/models/order.dart';
 import '../../core/providers.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 import '../cart/cart_providers.dart';
@@ -42,10 +44,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _cityController = TextEditingController();
   final _senderNumberController = TextEditingController();
   final _transactionIdController = TextEditingController();
+  final _couponController = TextEditingController();
 
   PaymentMethod _paymentMethod = PaymentMethod.cod;
   bool _isSubmitting = false;
   String? _error;
+
+  Coupon? _appliedCoupon;
+  bool _isValidatingCoupon = false;
+  String? _couponError;
 
   @override
   void dispose() {
@@ -55,7 +62,36 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _cityController.dispose();
     _senderNumberController.dispose();
     _transactionIdController.dispose();
+    _couponController.dispose();
     super.dispose();
+  }
+
+  Future<void> _applyCoupon(double orderAmount) async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) return;
+    setState(() {
+      _isValidatingCoupon = true;
+      _couponError = null;
+    });
+    try {
+      final repo = ref.read(couponsRepositoryProvider);
+      final coupon = await repo.validate(code: code, orderAmount: orderAmount);
+      setState(() => _appliedCoupon = coupon);
+    } on CouponValidationException catch (e) {
+      setState(() => _couponError = e.message);
+    } catch (e) {
+      setState(() => _couponError = 'Could not validate coupon. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isValidatingCoupon = false);
+    }
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _appliedCoupon = null;
+      _couponError = null;
+      _couponController.clear();
+    });
   }
 
   Future<void> _placeOrder() async {
@@ -81,6 +117,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           street: _streetController.text.trim(),
           city: _cityController.text.trim(),
         ),
+        couponCode: _appliedCoupon?.code,
       );
 
       // Order placed successfully — the backend clears the server-side
@@ -149,15 +186,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 const SizedBox(height: 24),
                 Text('Payment Method', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                for (final method in PaymentMethod.values)
-                  RadioListTile<PaymentMethod>(
-                    value: method,
-                    groupValue: _paymentMethod,
-                    onChanged: (v) => setState(() => _paymentMethod = v!),
-                    title: Text(method.label),
-                    activeColor: AppColors.primary,
-                    contentPadding: EdgeInsets.zero,
+                RadioGroup<PaymentMethod>(
+                  groupValue: _paymentMethod,
+                  onChanged: (v) => setState(() => _paymentMethod = v!),
+                  child: Column(
+                    children: [
+                      for (final method in PaymentMethod.values)
+                        RadioListTile<PaymentMethod>(
+                          value: method,
+                          title: Text(method.label),
+                          activeColor: Theme.of(context).colorScheme.primary,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                    ],
                   ),
+                ),
                 if (_paymentMethod.requiresSenderNumber) ...[
                   const SizedBox(height: 8),
                   TextFormField(
@@ -183,10 +226,46 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                 ],
                 const SizedBox(height: 24),
-                _OrderSummaryCard(cart: cart),
+                Text('Coupon Code', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                if (_appliedCoupon != null)
+                  _AppliedCouponChip(coupon: _appliedCoupon!, onRemove: _removeCoupon)
+                else
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _couponController,
+                          textCapitalization: TextCapitalization.characters,
+                          decoration: InputDecoration(
+                            labelText: 'Enter coupon code',
+                            errorText: _couponError,
+                          ),
+                          onSubmitted: (_) => _applyCoupon(cart.subtotal),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: _isValidatingCoupon ? null : () => _applyCoupon(cart.subtotal),
+                          child: _isValidatingCoupon
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text('Apply'),
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 24),
+                _OrderSummaryCard(cart: cart, appliedCoupon: _appliedCoupon),
                 if (_error != null) ...[
                   const SizedBox(height: 16),
-                  Text(_error!, style: const TextStyle(color: AppColors.error)),
+                  Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ],
                 const SizedBox(height: 20),
                 SizedBox(
@@ -212,16 +291,55 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 }
 
-class _OrderSummaryCard extends StatelessWidget {
-  const _OrderSummaryCard({required this.cart});
-  final Cart cart;
+class _AppliedCouponChip extends StatelessWidget {
+  const _AppliedCouponChip({required this.coupon, required this.onRemove});
+  final Coupon coupon;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
+    final brand = context.brand;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: brand.sage.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: brand.sage.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.local_offer_outlined, color: brand.sage, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '${coupon.code} applied — ${coupon.isPercentage ? '${coupon.discountValue.toStringAsFixed(0)}% off' : '${formatTaka(coupon.discountValue)} off'}',
+              style: TextStyle(color: brand.sage, fontWeight: FontWeight.w600),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 18),
+            onPressed: onRemove,
+            tooltip: 'Remove coupon',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderSummaryCard extends StatelessWidget {
+  const _OrderSummaryCard({required this.cart, this.appliedCoupon});
+  final Cart cart;
+  final Coupon? appliedCoupon;
+
+  @override
+  Widget build(BuildContext context) {
+    final brand = context.brand;
+    final previewDiscount = appliedCoupon?.previewDiscount(cart.subtotal) ?? 0;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight.withOpacity(0.4),
+        color: brand.roseSurface.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -233,6 +351,16 @@ class _OrderSummaryCard extends StatelessWidget {
               Text(formatTaka(cart.subtotal)),
             ],
           ),
+          if (previewDiscount > 0) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Coupon discount', style: TextStyle(color: brand.sage)),
+                Text('-${formatTaka(previewDiscount)}', style: TextStyle(color: brand.sage)),
+              ],
+            ),
+          ],
           const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -243,7 +371,7 @@ class _OrderSummaryCard extends StatelessWidget {
           ),
           const Divider(height: 20),
           Text(
-            'Free delivery on orders over ৳2,000',
+            'Free delivery on orders over ৳2,000. Final total (including any discounts) is confirmed on the order confirmation screen.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],

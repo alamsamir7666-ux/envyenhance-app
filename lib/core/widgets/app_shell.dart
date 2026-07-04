@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/cart/cart_providers.dart';
-import '../theme/app_theme.dart';
+import 'ink_underline.dart';
 
 /// Persistent bottom-nav shell wrapping the five primary tabs. Matches
 /// industry-standard e-commerce IA: Home, Browse, Cart, Wishlist, Profile.
@@ -33,29 +33,54 @@ class AppShell extends ConsumerWidget {
     final location = GoRouterState.of(context).matchedLocation;
     final currentIndex = _indexForLocation(location);
     final cartCount = ref.watch(cartItemCountProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: SafeArea(bottom: false, child: child),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (index) {
-          if (index != currentIndex) context.go(_tabs[index].path);
-        },
-        items: [
-          for (int i = 0; i < _tabs.length; i++)
-            BottomNavigationBarItem(
-              icon: _tabs[i].path == '/cart' && cartCount > 0
-                  ? Badge(
-                      label: Text('$cartCount'),
-                      backgroundColor: AppColors.primary,
-                      child: Icon(_tabs[i].icon),
-                    )
-                  : Icon(_tabs[i].icon),
-              activeIcon: Icon(_tabs[i].activeIcon),
-              label: _tabs[i].label,
-            ),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: (index) {
+              if (index != currentIndex) context.go(_tabs[index].path);
+            },
+            items: [
+              for (int i = 0; i < _tabs.length; i++)
+                BottomNavigationBarItem(
+                  icon: _tabs[i].path == '/cart' && cartCount > 0
+                      ? Badge(
+                          label: Text('$cartCount'),
+                          backgroundColor: theme.colorScheme.primary,
+                          child: Icon(_tabs[i].icon),
+                        )
+                      : Icon(_tabs[i].icon),
+                  activeIcon: _ActiveTabIcon(icon: _tabs[i].activeIcon),
+                  label: _tabs[i].label,
+                ),
+            ],
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Active tab icon with the ink-underline signature beneath it — one of
+/// the two sanctioned uses of the motif per the design plan.
+class _ActiveTabIcon extends StatelessWidget {
+  const _ActiveTabIcon({required this.icon});
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon),
+        const SizedBox(height: 2),
+        const InkUnderline(width: 16, strokeWidth: 2),
+      ],
     );
   }
 }

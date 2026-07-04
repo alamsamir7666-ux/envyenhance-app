@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
+import '../../core/widgets/app_skeleton.dart';
 import '../../core/widgets/async_states.dart';
 import '../../core/widgets/product_card.dart';
 import '../wishlist/wishlist_providers.dart';
@@ -78,7 +79,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           ),
           Expanded(
             child: state.isLoading && state.products.isEmpty
-                ? const LoadingView(message: 'Loading products…')
+                ? const ProductGridSkeleton()
                 : state.error != null && state.products.isEmpty
                     ? ErrorView(
                         message: state.error!,
@@ -91,7 +92,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                             subtitle: 'Try a different search or category.',
                           )
                         : RefreshIndicator(
-                            color: AppColors.primary,
+                            color: context.brand.gold,
                             onRefresh: () => ref.read(productListProvider.notifier).refresh(),
                             child: GridView.builder(
                               controller: _scrollController,
@@ -105,10 +106,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                               itemCount: state.products.length + (state.hasMore ? 1 : 0),
                               itemBuilder: (context, i) {
                                 if (i >= state.products.length) {
-                                  return const Center(
+                                  return Center(
                                     child: Padding(
-                                      padding: EdgeInsets.all(16),
-                                      child: CircularProgressIndicator(color: AppColors.primary),
+                                      padding: const EdgeInsets.all(16),
+                                      child: CircularProgressIndicator(color: context.brand.gold),
                                     ),
                                   );
                                 }
@@ -142,7 +143,7 @@ class _ActiveFilterChip extends StatelessWidget {
         child: Chip(
           label: Text(label),
           onDeleted: onClear,
-          backgroundColor: AppColors.primaryLight,
+          backgroundColor: context.brand.roseSurface,
         ),
       ),
     );

@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 import '../cart/cart_providers.dart';
@@ -14,6 +14,8 @@ class WishlistScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wishlistAsync = ref.watch(wishlistProvider);
+    final theme = Theme.of(context);
+    final brand = context.brand;
 
     return Scaffold(
       appBar: AppBar(title: const Text('My Wishlist')),
@@ -34,7 +36,7 @@ class WishlistScreen extends ConsumerWidget {
             );
           }
           return RefreshIndicator(
-            color: AppColors.primary,
+            color: brand.gold,
             onRefresh: () => ref.read(wishlistProvider.notifier).refresh(),
             child: ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -45,9 +47,9 @@ class WishlistScreen extends ConsumerWidget {
                 return Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: theme.cardTheme.color,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.divider),
+                    border: Border.all(color: theme.dividerColor),
                   ),
                   child: InkWell(
                     onTap: () => context.push('/products/${item.productId}'),
@@ -64,7 +66,7 @@ class WishlistScreen extends ConsumerWidget {
                             errorWidget: (_, __, ___) => Container(
                               width: 72,
                               height: 72,
-                              color: AppColors.primaryLight,
+                              color: brand.roseSurface,
                             ),
                           ),
                         ),
@@ -77,15 +79,15 @@ class WishlistScreen extends ConsumerWidget {
                                 item.product.name,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                style: theme.textTheme.bodyLarge?.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 formatTaka(item.product.effectivePrice),
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: AppColors.primary,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: brand.gold,
                                       fontWeight: FontWeight.w700,
                                     ),
                               ),
@@ -100,7 +102,7 @@ class WishlistScreen extends ConsumerWidget {
                               : null,
                         ),
                         IconButton(
-                          icon: const Icon(Icons.favorite, color: AppColors.error),
+                          icon: Icon(Icons.favorite, color: theme.colorScheme.error),
                           tooltip: 'Remove from wishlist',
                           onPressed: () => ref.read(wishlistProvider.notifier).toggle(item.productId),
                         ),

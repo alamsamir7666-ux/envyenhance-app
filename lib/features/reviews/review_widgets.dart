@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/auth/auth_service.dart';
 import '../../core/models/review.dart';
 import '../../core/providers.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 import 'reviews_providers.dart';
@@ -73,7 +72,7 @@ class ProductReviewsSection extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -140,6 +139,7 @@ class StarRatingDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gold = context.brand.gold;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(
@@ -147,7 +147,7 @@ class StarRatingDisplay extends StatelessWidget {
         (i) => Icon(
           i < rating ? Icons.star : Icons.star_border,
           size: size,
-          color: AppColors.accent,
+          color: gold,
         ),
       ),
     );
@@ -206,6 +206,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final brand = context.brand;
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -226,7 +227,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
               (i) => IconButton(
                 icon: Icon(
                   i < _rating ? Icons.star : Icons.star_border,
-                  color: AppColors.accent,
+                  color: brand.gold,
                   size: 32,
                 ),
                 onPressed: () => setState(() => _rating = i + 1),
@@ -244,7 +245,7 @@ class _WriteReviewSheetState extends ConsumerState<WriteReviewSheet> {
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(_error!, style: const TextStyle(color: AppColors.error)),
+              child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ),
           SizedBox(
             width: double.infinity,

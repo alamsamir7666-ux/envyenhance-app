@@ -103,6 +103,8 @@ class ShippingAddress {
     required this.phone,
     required this.street,
     required this.city,
+    this.district,
+    this.postalCode,
   });
 
   factory ShippingAddress.fromJson(Map<String, dynamic> json) {
@@ -111,6 +113,8 @@ class ShippingAddress {
       phone: json['phone'] as String? ?? '',
       street: json['street'] as String? ?? '',
       city: json['city'] as String? ?? '',
+      district: json['district'] as String?,
+      postalCode: json['postalCode'] as String?,
     );
   }
 
@@ -118,11 +122,15 @@ class ShippingAddress {
   final String phone;
   final String street;
   final String city;
+  final String? district;
+  final String? postalCode;
 
   Map<String, dynamic> toJson() => {
         'fullName': fullName,
         'phone': phone,
         'street': street,
         'city': city,
+        if (district != null) 'district': district,
+        if (postalCode != null) 'postalCode': postalCode,
       };
 }

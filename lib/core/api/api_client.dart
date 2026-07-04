@@ -30,8 +30,9 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (_tokenProvider != null) {
-            final token = await _tokenProvider();
+          final provider = _tokenProvider;
+          if (provider != null) {
+            final token = await provider();
             if (token != null) {
               options.headers['Authorization'] = 'Bearer $token';
             }
@@ -50,14 +51,14 @@ class ApiClient {
   }
 
   late final Dio _dio;
-  final TokenProvider? _tokenProvider;
+  TokenProvider? _tokenProvider;
   final Logger _logger = Logger();
 
   /// Allows updating the token provider after construction (e.g. once
-  /// Clerk finishes initializing, which happens after ApiClient is first
-  /// created via Riverpod).
-  TokenProvider? _override;
-  set tokenProvider(TokenProvider provider) => _override = provider;
+  /// auth finishes initializing, which happens after ApiClient is first
+  /// created via Riverpod). The interceptor reads `_tokenProvider`
+  /// directly on every request, so this takes effect immediately.
+  set tokenProvider(TokenProvider provider) => _tokenProvider = provider;
 
   Dio get dio => _dio;
 
@@ -90,6 +91,17 @@ class ApiClient {
   }) async {
     try {
       return await _dio.put<T>(path, data: data);
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  Future<Response<T>> patch<T>(
+    String path, {
+    Object? data,
+  }) async {
+    try {
+      return await _dio.patch<T>(path, data: data);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

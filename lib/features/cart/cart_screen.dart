@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/models/cart.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
 import 'cart_providers.dart';
@@ -58,12 +58,14 @@ class _CartItemTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         children: [
@@ -77,7 +79,7 @@ class _CartItemTile extends ConsumerWidget {
               errorWidget: (_, __, ___) => Container(
                 width: 72,
                 height: 72,
-                color: AppColors.primaryLight,
+                color: brand.roseSurface,
               ),
             ),
           ),
@@ -90,15 +92,15 @@ class _CartItemTile extends ConsumerWidget {
                   item.product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   formatTaka(item.product.effectivePrice),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.primary,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                        color: brand.gold,
                         fontWeight: FontWeight.w700,
                       ),
                 ),
@@ -118,7 +120,7 @@ class _CartItemTile extends ConsumerWidget {
                       child: Text(
                         '${item.quantity}',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: theme.textTheme.bodyLarge,
                       ),
                     ),
                     _StepperButton(
@@ -135,7 +137,7 @@ class _CartItemTile extends ConsumerWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error),
+            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
             tooltip: 'Remove',
             onPressed: () => ref.read(cartProvider.notifier).removeItem(item.productId),
           ),
@@ -152,16 +154,22 @@ class _StepperButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.divider),
+          border: Border.all(color: theme.dividerColor),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, size: 16, color: onTap == null ? AppColors.textSecondary : AppColors.textPrimary),
+        child: Icon(
+          icon,
+          size: 16,
+          color: onTap == null ? brand.textSecondary : theme.colorScheme.onSurface,
+        ),
       ),
     );
   }
@@ -173,12 +181,14 @@ class _CartSummaryBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.divider)),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          border: Border(top: BorderSide(color: theme.dividerColor)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -186,8 +196,8 @@ class _CartSummaryBar extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Subtotal', style: Theme.of(context).textTheme.bodyLarge),
-                Text(formatTaka(cart.subtotal), style: Theme.of(context).textTheme.bodyLarge),
+                Text('Subtotal', style: theme.textTheme.bodyLarge),
+                Text(formatTaka(cart.subtotal), style: theme.textTheme.bodyLarge),
               ],
             ),
             if (cart.discount > 0) ...[
@@ -195,15 +205,15 @@ class _CartSummaryBar extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Discount', style: TextStyle(color: AppColors.success)),
-                  Text('-${formatTaka(cart.discount)}', style: const TextStyle(color: AppColors.success)),
+                  Text('Discount', style: TextStyle(color: brand.sage)),
+                  Text('-${formatTaka(cart.discount)}', style: TextStyle(color: brand.sage)),
                 ],
               ),
             ],
             const SizedBox(height: 4),
             Text(
               'Delivery fee calculated at checkout',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
             SizedBox(

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/auth/mobile_auth_service.dart';
 import '../../core/providers.dart';
-import '../../core/theme/app_theme.dart';
 
 enum _AuthMode { signIn, signUp }
 
@@ -82,7 +81,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final isSignIn = _mode == _AuthMode.signIn;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -173,7 +171,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 16),
-                        Text(_error!, style: const TextStyle(color: AppColors.error)),
+                        Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                       ],
                       const SizedBox(height: 24),
                       SizedBox(

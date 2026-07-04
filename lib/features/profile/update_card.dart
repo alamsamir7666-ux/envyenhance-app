@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_brand_colors.dart';
 import '../../core/update/update_providers.dart';
 import '../../core/update/update_service.dart';
 
@@ -19,14 +19,15 @@ class UpdateCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(updateStatusProvider);
     final service = ref.read(updateServiceProvider);
+    final theme = Theme.of(context);
 
     return Card(
       margin: EdgeInsets.zero,
-      color: AppColors.surface,
+      color: theme.cardTheme.color,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.divider),
+        side: BorderSide(color: theme.dividerColor),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -44,6 +45,9 @@ class UpdateCard extends ConsumerWidget {
     UpdateStatus status,
     UpdateService service,
   ) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
+
     switch (status) {
       case UpdateIdle():
         return _CheckButton(onPressed: service.checkForUpdate);
@@ -64,7 +68,7 @@ class UpdateCard extends ConsumerWidget {
       case UpdateUpToDate():
         return Row(
           children: [
-            const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+            Icon(Icons.check_circle, color: brand.sage, size: 20),
             const SizedBox(width: 10),
             const Expanded(child: Text('You\'re on the latest version')),
             TextButton(
@@ -82,7 +86,7 @@ class UpdateCard extends ConsumerWidget {
               children: [
                 Icon(
                   isRequired ? Icons.error_outline : Icons.new_releases_outlined,
-                  color: isRequired ? AppColors.error : AppColors.primary,
+                  color: isRequired ? theme.colorScheme.error : brand.gold,
                   size: 20,
                 ),
                 const SizedBox(width: 10),
@@ -100,7 +104,7 @@ class UpdateCard extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 manifest.releaseNotes,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: TextStyle(color: brand.textSecondary, fontSize: 13),
               ),
             ],
             const SizedBox(height: 12),
@@ -126,13 +130,14 @@ class UpdateCard extends ConsumerWidget {
               child: LinearProgressIndicator(
                 value: progress > 0 ? progress : null,
                 minHeight: 6,
-                backgroundColor: AppColors.divider,
+                backgroundColor: theme.dividerColor,
+                color: brand.gold,
               ),
             ),
             const SizedBox(height: 6),
             Text(
               '${(progress * 100).clamp(0, 100).toStringAsFixed(0)}%',
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: TextStyle(color: brand.textSecondary, fontSize: 12),
             ),
           ],
         );
@@ -141,11 +146,11 @@ class UpdateCard extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.check_circle, color: AppColors.success, size: 20),
-                SizedBox(width: 10),
-                Text('Update verified and ready'),
+                Icon(Icons.check_circle, color: brand.sage, size: 20),
+                const SizedBox(width: 10),
+                const Text('Update verified and ready'),
               ],
             ),
             const SizedBox(height: 12),
@@ -158,9 +163,9 @@ class UpdateCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Android will ask you to confirm the install.',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style: TextStyle(color: brand.textSecondary, fontSize: 12),
             ),
           ],
         );
@@ -171,10 +176,10 @@ class UpdateCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(message, style: const TextStyle(color: AppColors.error)),
+                  child: Text(message, style: TextStyle(color: theme.colorScheme.error)),
                 ),
               ],
             ),
@@ -215,7 +220,7 @@ class _CurrentVersionRow extends StatelessWidget {
         final version = snapshot.data?.version ?? '…';
         return Text(
           'App version $version',
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: context.brand.textSecondary, fontSize: 13),
         );
       },
     );

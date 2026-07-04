@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_brand_colors.dart';
 
 /// Centered spinner for full-screen loading states.
 class LoadingView extends StatelessWidget {
@@ -12,7 +12,7 @@ class LoadingView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: AppColors.primary),
+          CircularProgressIndicator(color: context.brand.gold),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(message!, style: Theme.of(context).textTheme.bodyMedium),
@@ -44,7 +44,7 @@ class ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text(
               message,
@@ -87,7 +87,7 @@ class EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: AppColors.textSecondary),
+            Icon(icon, size: 56, color: context.brand.textSecondary),
             const SizedBox(height: 16),
             Text(
               title,
