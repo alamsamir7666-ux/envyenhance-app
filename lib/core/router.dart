@@ -22,6 +22,7 @@ import '../features/blog/blog_list_screen.dart';
 import '../features/blog/blog_article_screen.dart';
 import '../features/pre_orders/pre_orders_screen.dart';
 import '../features/returns/returns_screen.dart';
+import '../features/addresses/addresses_screen.dart';
 
 /// Routes that require a signed-in user. Anything not in this list is
 /// accessible to guests (browsing products, viewing product details).
@@ -38,6 +39,7 @@ const _protectedRoutes = [
   '/referrals',
   '/pre-orders',
   '/returns',
+  '/addresses',
 ];
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -105,6 +107,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/pre-orders', builder: (context, state) => const PreOrdersScreen()),
       GoRoute(path: '/returns', builder: (context, state) => const ReturnsScreen()),
+      GoRoute(path: '/addresses', builder: (context, state) => const AddressesScreen()),
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => SignInScreen(

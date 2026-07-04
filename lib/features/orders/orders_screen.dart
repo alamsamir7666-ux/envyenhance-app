@@ -37,9 +37,9 @@ class OrdersScreen extends ConsumerWidget {
             color: context.brand.gold,
             onRefresh: () async => ref.invalidate(myOrdersProvider),
             child: ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 24),
               itemCount: orders.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, i) => _OrderTile(order: orders[i]),
             ),
           );
@@ -69,15 +69,18 @@ class _OrderTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final brand = context.brand;
     final statusColor = _statusColor(context);
+    final firstItem = order.items.isNotEmpty ? order.items.first : null;
+
     return InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       onTap: () => context.push('/orders/${order.id}'),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: theme.dividerColor),
         ),
         child: Column(
@@ -86,9 +89,11 @@ class _OrderTile extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '#${order.trackingId}',
-                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                Expanded(
+                  child: Text(
+                    '#${order.trackingId}',
+                    style: theme.textTheme.titleLarge,
+                  ),
                 ),
                 AppBadge.soft(
                   text: order.orderStatus.toUpperCase(),
@@ -97,12 +102,31 @@ class _OrderTile extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(formatDate(order.createdAt), style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 6),
-            Text(
-              '${order.items.length} item${order.items.length == 1 ? '' : 's'} · ${formatTaka(order.totalAmount)}',
-              style: theme.textTheme.bodyLarge,
+            const SizedBox(height: 14),
+            if (firstItem != null)
+              Text(
+                order.items.length == 1
+                    ? firstItem.productName
+                    : '${firstItem.productName} +${order.items.length - 1} more',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyLarge,
+              ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${order.items.length} item${order.items.length == 1 ? '' : 's'}',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                Text(
+                  formatTaka(order.totalAmount),
+                  style: theme.textTheme.titleMedium?.copyWith(color: brand.gold),
+                ),
+              ],
             ),
           ],
         ),

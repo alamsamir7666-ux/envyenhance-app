@@ -138,11 +138,7 @@ class ProfileScreen extends ConsumerWidget {
               _MenuTile(
                 icon: Icons.location_on_outlined,
                 label: 'Saved Addresses',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Address management coming soon')),
-                  );
-                },
+                onTap: () => context.push('/addresses'),
               ),
               const _ThemeModeTile(),
               const Divider(height: 32),

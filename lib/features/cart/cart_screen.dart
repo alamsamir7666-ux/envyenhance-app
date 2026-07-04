@@ -37,10 +37,21 @@ class CartScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: cart.items.length,
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  itemCount: cart.items.length + 1,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, i) => _CartItemTile(item: cart.items[i]),
+                  itemBuilder: (context, i) {
+                    if (i == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          '${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      );
+                    }
+                    return _CartItemTile(item: cart.items[i - 1]);
+                  },
                 ),
               ),
               _CartSummaryBar(cart: cart),
@@ -61,29 +72,30 @@ class _CartItemTile extends ConsumerWidget {
     final theme = Theme.of(context);
     final brand = context.brand;
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             child: CachedNetworkImage(
               imageUrl: item.product.primaryImage,
-              width: 72,
-              height: 72,
+              width: 80,
+              height: 80,
               fit: BoxFit.cover,
               errorWidget: (_, __, ___) => Container(
-                width: 72,
-                height: 72,
+                width: 80,
+                height: 80,
                 color: brand.roseSurface,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +108,7 @@ class _CartItemTile extends ConsumerWidget {
                         fontWeight: FontWeight.w600,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   formatTaka(item.product.effectivePrice),
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -104,42 +116,48 @@ class _CartItemTile extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                       ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _StepperButton(
-                      icon: Icons.remove,
-                      onTap: item.quantity > 1
-                          ? () => ref
-                              .read(cartProvider.notifier)
-                              .updateQuantity(item.productId, item.quantity - 1)
-                          : null,
+                    Row(
+                      children: [
+                        _StepperButton(
+                          icon: Icons.remove,
+                          onTap: item.quantity > 1
+                              ? () => ref
+                                  .read(cartProvider.notifier)
+                                  .updateQuantity(item.productId, item.quantity - 1)
+                              : null,
+                        ),
+                        SizedBox(
+                          width: 36,
+                          child: Text(
+                            '${item.quantity}',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyLarge,
+                          ),
+                        ),
+                        _StepperButton(
+                          icon: Icons.add,
+                          onTap: item.quantity < item.product.stock
+                              ? () => ref
+                                  .read(cartProvider.notifier)
+                                  .updateQuantity(item.productId, item.quantity + 1)
+                              : null,
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                      width: 32,
-                      child: Text(
-                        '${item.quantity}',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                    ),
-                    _StepperButton(
-                      icon: Icons.add,
-                      onTap: item.quantity < item.product.stock
-                          ? () => ref
-                              .read(cartProvider.notifier)
-                              .updateQuantity(item.productId, item.quantity + 1)
-                          : null,
+                    IconButton(
+                      icon: Icon(Icons.delete_outline, color: theme.colorScheme.error, size: 22),
+                      tooltip: 'Remove',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => ref.read(cartProvider.notifier).removeItem(item.productId),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            tooltip: 'Remove',
-            onPressed: () => ref.read(cartProvider.notifier).removeItem(item.productId),
           ),
         ],
       ),
@@ -158,12 +176,12 @@ class _StepperButton extends StatelessWidget {
     final brand = context.brand;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           border: Border.all(color: theme.dividerColor),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           icon,
@@ -184,8 +202,9 @@ class _CartSummaryBar extends StatelessWidget {
     final theme = Theme.of(context);
     final brand = context.brand;
     return SafeArea(
+      top: false,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
         decoration: BoxDecoration(
           color: theme.cardTheme.color,
           border: Border(top: BorderSide(color: theme.dividerColor)),
@@ -197,11 +216,14 @@ class _CartSummaryBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Subtotal', style: theme.textTheme.bodyLarge),
-                Text(formatTaka(cart.subtotal), style: theme.textTheme.bodyLarge),
+                Text(
+                  formatTaka(cart.subtotal),
+                  style: theme.textTheme.titleLarge,
+                ),
               ],
             ),
             if (cart.discount > 0) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -215,7 +237,7 @@ class _CartSummaryBar extends StatelessWidget {
               'Delivery fee calculated at checkout',
               style: theme.textTheme.bodyMedium,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
