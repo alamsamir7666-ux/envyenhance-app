@@ -64,6 +64,7 @@ class HomeScreen extends ConsumerWidget {
                 _BestByCategorySection(wishlistIds: wishlistIds),
                 const SizedBox(height: 8),
                 const _WhyChooseUsSection(),
+                const _InstagramSection(),
                 if (sections.trending.isEmpty && sections.newArrivals.isEmpty)
                   const Padding(
                     padding: EdgeInsets.only(top: 40),
@@ -480,6 +481,97 @@ class _WhyChooseUsSection extends StatelessWidget {
                 ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InstagramSection extends StatelessWidget {
+  const _InstagramSection();
+
+  static const _handle = '@envyenhance';
+  static const _url = 'https://instagram.com/envyenhance';
+  static const _posts = [
+    'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&q=80&fm=webp',
+    'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&q=80&fm=webp',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80&fm=webp',
+    'https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=400&q=80&fm=webp',
+    'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&q=80&fm=webp',
+    'https://images.unsplash.com/photo-1576426863848-c21f53c60b19?w=400&q=80&fm=webp',
+  ];
+
+  Future<void> _open() async {
+    final uri = Uri.parse(_url);
+    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brand = context.brand;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFE1306C), Color(0xFFF77737)],
+                        begin: Alignment.topLeft, end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Follow Our Journey', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                      Text(_handle + ' on Instagram', style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: _open,
+                child: Text('Follow', style: theme.textTheme.bodyMedium?.copyWith(color: brand.gold, fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          GridView.count(
+            crossAxisCount: 3,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 4, crossAxisSpacing: 4,
+            children: _posts.map((url) => GestureDetector(
+              onTap: _open,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(imageUrl: url, fit: BoxFit.cover),
+              ),
+            )).toList(),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _open,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.camera_alt_outlined, size: 16),
+                const SizedBox(width: 6),
+                Text('View all posts on Instagram', style: theme.textTheme.bodyMedium),
+              ],
+            ),
+          ),
         ],
       ),
     );

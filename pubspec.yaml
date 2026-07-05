@@ -26,6 +26,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
 
   # Images
+  url_launcher: ^6.3.0
   cached_network_image: ^3.3.1
 
   # Rich content rendering (blog posts authored via admin's rich text editor

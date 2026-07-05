@@ -58,7 +58,13 @@ class ProductCard extends StatelessWidget {
                           color: theme.colorScheme.error,
                         ),
                       ),
-                    if (!product.inStock)
+                    if (product.productStatus == 'pre_order')
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: AppBadge.solid(text: 'Pre-Order', color: brand.gold),
+                      )
+                    else if (!product.inStock)
                       Positioned(
                         top: 8,
                         left: 8,
