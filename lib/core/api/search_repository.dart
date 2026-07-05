@@ -71,7 +71,7 @@ class SearchRepository {
     }
     final res = await _client.get<Map<String, dynamic>>(
       '/search/autocomplete',
-      queryParameters: {'q': query.trim()},
+      query: {'q': query.trim()},
     );
     final data = res.data ?? {};
     return SearchResult(

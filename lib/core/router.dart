@@ -117,7 +117,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/pre-orders', builder: (context, state) => const PreOrdersScreen()),
       GoRoute(path: '/returns', builder: (context, state) => const ReturnsScreen()),
       GoRoute(path: '/addresses',
-  '/email-preferences', builder: (context, state) => const AddressesScreen()),
+  builder: (context, state) => const AddressesScreen()),
+      GoRoute(path: '/flash-sales', builder: (context, state) => const FlashSalesScreen()),
+      GoRoute(path: '/search', builder: (context, state) => const SearchScreen()),
+      GoRoute(path: '/track-order', builder: (context, state) => TrackOrderScreen(initialTrackingId: state.uri.queryParameters['id'])),
+      GoRoute(path: '/compare', builder: (context, state) => const CompareScreen()),
+      GoRoute(path: '/email-preferences', builder: (context, state) => const EmailPreferencesScreen()),
+      GoRoute(path: '/pre-orders/:trackingId', builder: (context, state) => PreOrderDetailScreen(trackingId: state.pathParameters['trackingId']!)),
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => SignInScreen(

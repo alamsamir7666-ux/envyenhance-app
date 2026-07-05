@@ -155,7 +155,7 @@ class _TrackResult extends ConsumerWidget {
         ),
       ),
       data: (order) {
-        final currentStep = _orderSteps.indexOf(order.orderStatus '');
+        final currentStep = _orderSteps.indexOf(order.orderStatus ?? '');
         final isCancelled = order.orderStatus == 'cancelled';
 
         return Column(
@@ -189,7 +189,7 @@ class _TrackResult extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          (order.orderStatus '').toUpperCase(),
+                          (order.orderStatus ?? '').toUpperCase(),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,

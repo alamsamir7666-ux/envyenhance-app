@@ -133,7 +133,7 @@ class _FlashProductCardState extends State<_FlashProductCard> {
                             width: double.infinity,
                             fit: BoxFit.cover,
                           )
-                        : Container(color: brand.blush),
+                        : Container(color: brand.roseSurface),
                   ),
                   if (product.discountPercent > 0)
                     Positioned(

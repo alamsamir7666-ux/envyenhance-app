@@ -69,7 +69,6 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 _BestByCategorySection(wishlistIds: wishlistIds),
                 const SizedBox(height: 8),
-                const _FlashSalesSection(),
                 const SizedBox(height: 8),
                 const _WhyChooseUsSection(),
                 const _InstagramSection(),

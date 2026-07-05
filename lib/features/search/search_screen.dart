@@ -155,7 +155,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   )
                                 : Container(
                                     width: 48, height: 48,
-                                    color: brand.blush,
+                                    color: brand.roseSurface,
                                   ),
                           ),
                           title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),

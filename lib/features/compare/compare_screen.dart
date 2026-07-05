@@ -122,7 +122,7 @@ class _CompareTable extends ConsumerWidget {
                                       )
                                     : Container(
                                         height: 90,
-                                        color: brand.blush,
+                                        color: brand.roseSurface,
                                       ),
                               ),
                               Positioned(
