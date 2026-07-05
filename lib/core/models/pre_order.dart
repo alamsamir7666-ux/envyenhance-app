@@ -31,9 +31,9 @@ class PreOrder {
       productName: json['productName'] as String,
       productImage: json['productImage'] as String? ?? '',
       quantity: json['quantity'] as int,
-      productPrice: (json['productPrice'] as num).toDouble(),
-      discountedPrice: (json['discountedPrice'] as num).toDouble(),
-      deliveryCharge: (json['deliveryCharge'] as num).toDouble(),
+      productPrice: double.parse(json['productPrice'].toString()),
+      discountedPrice: double.parse(json['discountedPrice'].toString()),
+      deliveryCharge: double.parse(json['deliveryCharge'].toString()),
       shippingAddress:
           ShippingAddress.fromJson(json['shippingAddress'] as Map<String, dynamic>),
       paymentMethod: json['paymentMethod'] as String,
