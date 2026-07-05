@@ -25,6 +25,10 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('EnvyEnhance'),
         actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => context.push('/search'),
+            ),
           IconButton(
             icon: const Icon(Icons.search),
             tooltip: 'Search',
@@ -64,6 +68,8 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 _BestByCategorySection(wishlistIds: wishlistIds),
+                const SizedBox(height: 8),
+                const _FlashSalesSection(),
                 const SizedBox(height: 8),
                 const _WhyChooseUsSection(),
                 const _InstagramSection(),

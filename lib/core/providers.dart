@@ -13,6 +13,11 @@ import 'api/products_repository.dart';
 import 'api/push_repository.dart';
 import 'api/referrals_repository.dart';
 import 'api/returns_repository.dart';
+import 'api/variants_repository.dart';
+import 'api/flash_sales_repository.dart';
+import 'api/search_repository.dart';
+import 'api/email_preferences_repository.dart';
+import 'api/newsletter_repository.dart';
 import 'api/reviews_repository.dart';
 import 'api/skin_profile_repository.dart';
 import 'api/stock_alerts_repository.dart';
@@ -131,4 +136,24 @@ final returnsRepositoryProvider = Provider<ReturnsRepository>((ref) {
 
 final pushRepositoryProvider = Provider<PushRepository>((ref) {
   return PushRepository(ref.watch(apiClientProvider));
+});
+
+final variantsRepositoryProvider = Provider<VariantsRepository>((ref) {
+  return VariantsRepository(ref.watch(apiClientProvider));
+});
+
+final flashSalesRepositoryProvider = Provider<FlashSalesRepository>((ref) {
+  return FlashSalesRepository(ref.watch(apiClientProvider));
+});
+
+final searchRepositoryProvider = Provider<SearchRepository>((ref) {
+  return SearchRepository(ref.watch(apiClientProvider));
+});
+
+final emailPreferencesRepositoryProvider = Provider<EmailPreferencesRepository>((ref) {
+  return EmailPreferencesRepository(ref.watch(apiClientProvider));
+});
+
+final newsletterRepositoryProvider = Provider<NewsletterRepository>((ref) {
+  return NewsletterRepository(ref.watch(apiClientProvider));
 });

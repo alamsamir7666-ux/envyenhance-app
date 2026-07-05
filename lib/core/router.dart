@@ -24,6 +24,13 @@ import '../features/blog/blog_article_screen.dart';
 import '../features/pre_orders/pre_orders_screen.dart';
 import '../features/returns/returns_screen.dart';
 import '../features/addresses/addresses_screen.dart';
+import '../features/flash_sales/flash_sales_screen.dart';
+import '../features/search/search_screen.dart';
+import '../features/pre_orders/pre_order_checkout_screen.dart';
+import '../features/pre_orders/pre_order_detail_screen.dart';
+import '../features/track_order/track_order_screen.dart';
+import '../features/compare/compare_screen.dart';
+import '../features/email_preferences/email_preferences_screen.dart';
 
 /// Routes that require a signed-in user. Anything not in this list is
 /// accessible to guests (browsing products, viewing product details).
@@ -41,6 +48,7 @@ const _protectedRoutes = [
   '/pre-orders',
   '/returns',
   '/addresses',
+  '/email-preferences',
 ];
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -108,7 +116,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/pre-orders', builder: (context, state) => const PreOrdersScreen()),
       GoRoute(path: '/returns', builder: (context, state) => const ReturnsScreen()),
-      GoRoute(path: '/addresses', builder: (context, state) => const AddressesScreen()),
+      GoRoute(path: '/addresses',
+  '/email-preferences', builder: (context, state) => const AddressesScreen()),
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => SignInScreen(

@@ -138,6 +138,16 @@ class ProfileScreen extends ConsumerWidget {
               _MenuTile(
                 icon: Icons.location_on_outlined,
                 label: 'Saved Addresses',
+                onTap: () => context.push('/track-order'),
+              ),
+              _ProfileTile(
+                icon: Icons.email_outlined,
+                label: 'Email Preferences',
+                onTap: () => context.push('/email-preferences'),
+              ),
+              _ProfileTile(
+                icon: Icons.location_on_outlined,
+                label: 'Saved Addresses',
                 onTap: () => context.push('/addresses'),
               ),
               const _ThemeModeTile(),

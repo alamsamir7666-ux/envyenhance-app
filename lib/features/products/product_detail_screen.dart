@@ -290,7 +290,7 @@ class _AddToCartBar extends ConsumerWidget {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : Text(product.inStock ? 'Add to Cart' : 'Out of Stock'),
+                    : Text(product.productStatus == 'pre_order' ? 'Pre-Order Now' : product.inStock ? 'Add to Cart' : 'Out of Stock'),
               ),
             ),
           ],
