@@ -11,6 +11,7 @@ class ProductsRepository {
     double? minPrice,
     double? maxPrice,
     double? minRating,
+    String? homepageTag,
     int page = 1,
     int limit = 20,
   }) async {
@@ -20,6 +21,7 @@ class ProductsRepository {
       if (minPrice != null) 'minPrice': minPrice,
       if (maxPrice != null) 'maxPrice': maxPrice,
       if (minRating != null) 'minRating': minRating,
+      if (homepageTag != null) 'homepageTag': homepageTag,
       'page': page,
       'limit': limit,
     });

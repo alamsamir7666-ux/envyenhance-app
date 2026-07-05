@@ -5,6 +5,22 @@ allprojects {
     }
 }
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Required for Firebase (push notifications) to read
+        // android/app/google-services.json at build time. See
+        // lib/core/push/push_service.dart for the full Firebase setup
+        // checklist — without that file present, this plugin has
+        // nothing to configure and Firebase.initializeApp() in main.dart
+        // fails gracefully at runtime instead.
+        classpath 'com.google.gms:google-services:4.4.2'
+    }
+}
+
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

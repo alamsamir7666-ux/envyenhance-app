@@ -28,6 +28,10 @@ dependencies:
   # Images
   cached_network_image: ^3.3.1
 
+  # Rich content rendering (blog posts authored via admin's rich text editor
+  # are stored as raw HTML, not the legacy structured block array)
+  flutter_html: ^3.0.0-beta.2
+
   # UI
   shimmer: ^3.0.0
   google_fonts: ^6.2.1
@@ -35,6 +39,15 @@ dependencies:
   # Utils
   collection: ^1.18.0
   logger: ^2.4.0
+
+  # Push notifications. Version numbers deliberately loose (^) rather than
+  # pinned — firebase_core and firebase_messaging release in lockstep and
+  # must stay mutually compatible; run `flutter pub upgrade` after adding
+  # these so pub resolves whatever's currently compatible rather than
+  # relying on versions guessed at write-time.
+  firebase_core: ^3.0.0
+  firebase_messaging: ^15.0.0
+  flutter_local_notifications: ^18.0.0
 
   # In-app update: version.json fetch, APK download, checksum verify, install
   package_info_plus: ^8.3.0

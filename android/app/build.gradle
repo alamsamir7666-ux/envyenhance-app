@@ -4,6 +4,17 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// Push notifications (Firebase Cloud Messaging) — applied conditionally so
+// the build doesn't fail before Firebase is set up. The google-services
+// plugin hard-fails the build if google-services.json is missing, so we
+// only apply it once that file actually exists. Until then,
+// Firebase.initializeApp() in main.dart fails gracefully at runtime and
+// the rest of the app works exactly as before. See
+// lib/core/push/push_service.dart for the full setup checklist.
+if (file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {

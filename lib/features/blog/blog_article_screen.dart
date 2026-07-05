@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/blog_post.dart';
 import '../../core/providers.dart';
@@ -57,7 +58,36 @@ class BlogArticleScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       Text(post.readTime, style: theme.textTheme.bodyMedium),
                       const Divider(height: 32),
-                      for (final block in post.content) _ContentBlockWidget(block: block),
+                      if (post.htmlContent != null)
+                        Html(
+                          data: post.htmlContent!,
+                          style: {
+                            'body': Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                              fontSize: FontSize(theme.textTheme.bodyLarge?.fontSize ?? 15),
+                              lineHeight: const LineHeight(1.5),
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            'h2': Style(
+                              fontFamily: theme.textTheme.headlineMedium?.fontFamily,
+                              fontSize: FontSize(theme.textTheme.headlineMedium?.fontSize ?? 20),
+                              fontWeight: FontWeight.w600,
+                              margin: Margins.only(top: 20, bottom: 10),
+                            ),
+                            'h3': Style(
+                              fontFamily: theme.textTheme.titleLarge?.fontFamily,
+                              fontSize: FontSize(theme.textTheme.titleLarge?.fontSize ?? 18),
+                              fontWeight: FontWeight.w600,
+                              margin: Margins.only(top: 16, bottom: 8),
+                            ),
+                            'p': Style(margin: Margins.only(bottom: 14)),
+                            'li': Style(margin: Margins.only(bottom: 6)),
+                            'a': Style(color: brand.gold),
+                          },
+                        )
+                      else
+                        for (final block in post.content) _ContentBlockWidget(block: block),
                     ],
                   ),
                 ),

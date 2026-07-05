@@ -10,6 +10,7 @@ import 'api/orders_repository.dart';
 import 'api/pre_orders_repository.dart';
 import 'api/product_qa_repository.dart';
 import 'api/products_repository.dart';
+import 'api/push_repository.dart';
 import 'api/referrals_repository.dart';
 import 'api/returns_repository.dart';
 import 'api/reviews_repository.dart';
@@ -126,4 +127,8 @@ final preOrdersRepositoryProvider = Provider<PreOrdersRepository>((ref) {
 
 final returnsRepositoryProvider = Provider<ReturnsRepository>((ref) {
   return ReturnsRepository(ref.watch(apiClientProvider));
+});
+
+final pushRepositoryProvider = Provider<PushRepository>((ref) {
+  return PushRepository(ref.watch(apiClientProvider));
 });

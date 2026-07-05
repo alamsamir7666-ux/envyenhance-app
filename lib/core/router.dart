@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'providers.dart';
+import 'push/push_service.dart';
 import 'widgets/app_shell.dart';
 import '../features/auth/sign_in_screen.dart';
 import '../features/home/home_screen.dart';
@@ -115,5 +116,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
     ],
+  );
+});
+
+/// Depends on routerProvider (for notification-tap deep links) and
+/// authServiceProvider (to know when to register/unregister the device's
+/// FCM token) — defined here rather than in providers.dart to avoid a
+/// circular import, since router.dart already imports providers.dart.
+final pushServiceProvider = Provider<PushService>((ref) {
+  return PushService(
+    ref.watch(pushRepositoryProvider),
+    ref.watch(authServiceProvider),
+    ref.watch(routerProvider),
   );
 });

@@ -3,6 +3,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Required: lets the app prompt Android's installer for self-updates -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Required on Android 13+ (API 33) to show push/local notifications;
+         requested at runtime via FirebaseMessaging.requestPermission() in
+         push_service.dart, but the manifest entry is required regardless. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Required so a killed/backgrounded app can still receive FCM
+         messages and wake to process them. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
         android:label="EnvyEnhance"
@@ -29,5 +37,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Default channel/icon for notifications delivered while the
+             app is backgrounded/killed (FCM auto-displays using these
+             when there's no foreground handler to intercept it — see
+             push_service.dart for the foreground case). Must match the
+             channel id created in push_service.dart's _androidChannel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="envyenhance_default" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
     </application>
 </manifest>

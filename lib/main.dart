@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/api/auth_repository.dart';
@@ -10,8 +11,17 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'core/update/update_providers.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Push notifications are a nicety, not core functionality — if
+  // google-services.json hasn't been added yet (see lib/core/push/
+  // push_service.dart for setup steps), this fails silently and the rest
+  // of the app works exactly as before.
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('[push] Firebase.initializeApp failed (non-fatal): $e');
+  }
   runApp(const _AppBootstrap());
 }
 
@@ -67,8 +77,21 @@ class _EnvyEnhanceAppState extends ConsumerState<EnvyEnhanceApp> {
     // it never delays app startup or blocks the UI thread. Failures are
     // swallowed inside UpdateService itself — this is a background nicety,
     // not something that should ever interrupt the shopping experience.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       ref.read(updateServiceProvider).checkForUpdate();
+
+      final pushService = ref.read(pushServiceProvider);
+      await pushService.initialize();
+      await pushService.syncTokenForCurrentUser();
+
+      // Re-sync whenever sign-in state changes (sign in → register this
+      // device; sign out → unregister it so the old user's device stops
+      // receiving notifications meant for them).
+      ref.listenManual(authIdentityProvider, (previous, next) {
+        if (previous?.isSignedIn != next.isSignedIn) {
+          pushService.syncTokenForCurrentUser();
+        }
+      });
     });
   }
 
