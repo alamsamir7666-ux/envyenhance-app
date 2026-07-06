@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'providers.dart';
+import '../core/models/product.dart';
 import 'push/push_service.dart';
 import 'widgets/app_shell.dart';
 import '../features/auth/sign_in_screen.dart';
