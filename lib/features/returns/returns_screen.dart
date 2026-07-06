@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/return_request.dart';
 import '../../core/providers.dart';
@@ -58,6 +59,14 @@ class _ReturnTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => context.push('/orders/${returnRequest.orderId}'),
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
     final brand = context.brand;
     final statusColor = switch (returnRequest.status) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/pre_order.dart';
 import '../../core/providers.dart';
@@ -59,6 +60,14 @@ class _PreOrderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => context.push('/pre-orders/${preOrder.trackingId}'),
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
     final brand = context.brand;
     final statusColor = switch (preOrder.status) {

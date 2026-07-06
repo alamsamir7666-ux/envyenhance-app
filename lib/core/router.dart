@@ -92,6 +92,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/checkout', builder: (context, state) => const CheckoutScreen()),
+      GoRoute(path: '/pre-order-checkout', builder: (context, state) => PreOrderCheckoutScreen(product: state.extra as Product)),
       GoRoute(
         path: '/orders/:id',
         builder: (context, state) => OrderDetailScreen(

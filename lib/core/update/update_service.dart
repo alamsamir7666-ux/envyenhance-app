@@ -74,6 +74,7 @@ class UpdateService {
   final Logger _logger = Logger();
 
   final _statusController = StreamController<UpdateStatus>.broadcast();
+  UpdateStatus _lastStatus = const UpdateIdle();
   Stream<UpdateStatus> get statusStream => _statusController.stream;
 
   UpdateStatus _status = const UpdateIdle();
@@ -81,6 +82,7 @@ class UpdateService {
 
   void _emit(UpdateStatus status) {
     _status = status;
+    _lastStatus = status;
     _statusController.add(status);
   }
 

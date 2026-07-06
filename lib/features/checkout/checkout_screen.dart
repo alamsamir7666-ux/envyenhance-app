@@ -226,7 +226,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             SnackBar(content: Text(warning), duration: const Duration(seconds: 6)),
           );
         }
-        context.go('/orders/${order.id}');
+        context.pushReplacement('/orders/${order.id}');
       }
     } catch (e) {
       setState(() => _error = e.toString());

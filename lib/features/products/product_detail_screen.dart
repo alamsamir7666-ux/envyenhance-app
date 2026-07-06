@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,9 +115,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        product.inStock ? 'In stock (${product.stock} left)' : 'Out of stock',
+                        product.productStatus == 'pre_order'
+                            ? 'Available for Pre-Order'
+                            : product.inStock
+                                ? 'In stock (${product.stock} left)'
+                                : 'Out of stock',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                              color: product.inStock ? brand.sage : theme.colorScheme.error,
+                              color: product.productStatus == 'pre_order'
+                                  ? brand.gold
+                                  : product.inStock
+                                      ? brand.sage
+                                      : theme.colorScheme.error,
                               fontWeight: FontWeight.w600,
                             ),
                       ),
