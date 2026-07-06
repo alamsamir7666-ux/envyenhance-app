@@ -67,6 +67,12 @@ class AppTheme {
     );
 
     return base.copyWith(
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.iOS: _FadeSlidePageTransitionsBuilder(),
+        },
+      ),
       scaffoldBackgroundColor: backgroundColor,
       textTheme: sansTextTheme,
       extensions: [brand],
@@ -161,6 +167,33 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: brand.gold),
+    );
+  }
+}
+
+/// Subtle luxury-minimal page transition: fade combined with a small
+/// upward slide, replacing the default abrupt Material slide-in.
+class _FadeSlidePageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FadeSlidePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.03),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
     );
   }
 }
