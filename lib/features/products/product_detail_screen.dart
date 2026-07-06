@@ -60,6 +60,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: _ImageCarousel(
                     images: product.images,
+                    productId: product.id,
                     currentIndex: _imageIndex,
                     onPageChanged: (i) => setState(() => _imageIndex = i),
                   ),
@@ -187,9 +188,11 @@ class _ImageCarousel extends StatelessWidget {
     required this.images,
     required this.currentIndex,
     required this.onPageChanged,
+    required this.productId,
   });
 
   final List<String> images;
+  final int productId;
   final int currentIndex;
   final ValueChanged<int> onPageChanged;
 
@@ -208,10 +211,18 @@ class _ImageCarousel extends StatelessWidget {
         PageView.builder(
           itemCount: images.length,
           onPageChanged: onPageChanged,
-          itemBuilder: (context, i) => CachedNetworkImage(
-            imageUrl: images[i],
-            fit: BoxFit.cover,
-          ),
+          itemBuilder: (context, i) => i == 0
+              ? Hero(
+                  tag: 'product-image-${productId}',
+                  child: CachedNetworkImage(
+                    imageUrl: images[i],
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : CachedNetworkImage(
+                  imageUrl: images[i],
+                  fit: BoxFit.cover,
+                ),
         ),
         if (images.length > 1)
           Positioned(

@@ -47,7 +47,10 @@ class ProductCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    _ProductImage(url: product.primaryImage),
+                    Hero(
+                      tag: 'product-image-${product.id}',
+                      child: _ProductImage(url: product.primaryImage),
+                    ),
                     if (product.isOnSale)
                       Positioned(
                         top: 8,
