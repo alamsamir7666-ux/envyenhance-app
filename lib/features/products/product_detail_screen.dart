@@ -250,7 +250,7 @@ class _ImageCarousel extends StatelessWidget {
   }
 }
 
-class _AddToCartBar extends ConsumerWidget {
+class _AddToCartBar extends ConsumerStatefulWidget {
   const _AddToCartBar({
     required this.product,
     required this.quantity,
@@ -262,10 +262,44 @@ class _AddToCartBar extends ConsumerWidget {
   final ValueChanged<int> onQuantityChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AddToCartBar> createState() => _AddToCartBarState();
+}
+
+class _AddToCartBarState extends ConsumerState<_AddToCartBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  bool _justAdded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.08)
+        .chain(CurveTween(curve: Curves.easeOut))
+        .animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _playBounce() async {
+    await _controller.forward();
+    await _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cartState = ref.watch(cartProvider);
     final isAdding = cartState.isLoading;
     final theme = Theme.of(context);
+    final product = widget.product;
 
     return SafeArea(
       child: Container(
@@ -277,40 +311,66 @@ class _AddToCartBar extends ConsumerWidget {
         child: Row(
           children: [
             _QuantityStepper(
-              quantity: quantity,
+              quantity: widget.quantity,
               max: product.stock,
-              onChanged: onQuantityChanged,
+              onChanged: widget.onQuantityChanged,
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: ElevatedButton(
-                onPressed: !product.inStock || isAdding
-                    ? null
-                    : () async {
-                        try {
-                          await ref
-                              .read(cartProvider.notifier)
-                              .addItem(product.id, quantity: quantity);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Added to cart')),
-                            );
+              child: ScaleTransition(
+                scale: _scale,
+                child: ElevatedButton(
+                  onPressed: !product.inStock || isAdding
+                      ? null
+                      : () async {
+                          try {
+                            await ref
+                                .read(cartProvider.notifier)
+                                .addItem(product.id, quantity: widget.quantity);
+                            if (context.mounted) {
+                              setState(() => _justAdded = true);
+                              unawaited(_playBounce());
+                              Future.delayed(const Duration(milliseconds: 1100), () {
+                                if (mounted) setState(() => _justAdded = false);
+                              });
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
                           }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
-                          }
-                        }
-                      },
-                child: isAdding
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : Text(product.productStatus == 'pre_order' ? 'Pre-Order Now' : product.inStock ? 'Add to Cart' : 'Out of Stock'),
+                        },
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: isAdding
+                        ? const SizedBox(
+                            key: ValueKey('loading'),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : _justAdded
+                            ? const Row(
+                                key: ValueKey('added'),
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.check, size: 18, color: Colors.white),
+                                  SizedBox(width: 6),
+                                  Text('Added'),
+                                ],
+                              )
+                            : Text(
+                                key: const ValueKey('label'),
+                                product.productStatus == 'pre_order'
+                                    ? 'Pre-Order Now'
+                                    : product.inStock
+                                        ? 'Add to Cart'
+                                        : 'Out of Stock',
+                              ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -318,8 +378,6 @@ class _AddToCartBar extends ConsumerWidget {
       ),
     );
   }
-}
-
 class _QuantityStepper extends StatelessWidget {
   const _QuantityStepper({
     required this.quantity,
