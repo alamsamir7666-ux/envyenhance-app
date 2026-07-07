@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/models/product.dart';
 import '../../core/models/variant.dart';
 import '../../core/theme/app_brand_colors.dart';
@@ -135,7 +136,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                               fontWeight: FontWeight.w600,
                             ),
                       ),
-                      if (!product.inStock) ...[
+                      if (product.productStatus != 'pre_order' && !product.inStock) ...[
                         const SizedBox(height: 12),
                         StockAlertButton(productId: product.id),
                       ],
@@ -483,11 +484,15 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
     final theme = Theme.of(context);
     final product = widget.product;
     final variant = widget.variant;
+    final isPreOrder = product.productStatus == 'pre_order';
     // The variant's own stock overrides the base product's once one is
     // selected — a product can be "in stock" overall while the chosen
-    // size/shade specifically is sold out.
+    // size/shade specifically is sold out. Pre-order items are always
+    // actionable regardless of raw stock count (stock is naturally 0
+    // until the shipment arrives) — matches the website's button logic.
     final effectiveStock = variant?.stock ?? product.stock;
-    final effectiveInStock = variant != null ? variant.inStock : product.inStock;
+    final effectiveInStock =
+        isPreOrder || (variant != null ? variant.inStock : product.inStock);
 
     return SafeArea(
       child: Container(
@@ -510,7 +515,9 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
                 child: ElevatedButton(
                   onPressed: !effectiveInStock || isAdding
                       ? null
-                      : () async {
+                      : isPreOrder
+                          ? () => context.push('/pre-order-checkout', extra: product)
+                          : () async {
                           try {
                             await ref
                                 .read(cartProvider.notifier)
