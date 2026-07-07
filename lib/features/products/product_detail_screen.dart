@@ -1,11 +1,15 @@
-import 'package:go_router/go_router.dart';
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/product.dart';
+import '../../core/models/variant.dart';
 import '../../core/theme/app_brand_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/async_states.dart';
+import '../../core/widgets/product_card.dart';
+import '../../core/widgets/staggered_entrance.dart';
 import '../cart/cart_providers.dart';
 import '../reviews/review_widgets.dart';
 import '../wishlist/wishlist_providers.dart';
@@ -24,6 +28,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   int _imageIndex = 0;
   int _quantity = 1;
+  ProductVariant? _selectedVariant;
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +139,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         const SizedBox(height: 12),
                         StockAlertButton(productId: product.id),
                       ],
+                      _VariantSelector(
+                        productId: product.id,
+                        selected: _selectedVariant,
+                        onSelected: (v) => setState(() => _selectedVariant = v),
+                      ),
                       const Divider(height: 32),
                       Text('Description', style: theme.textTheme.titleLarge),
                       const SizedBox(height: 8),
@@ -167,6 +177,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ),
                 ),
               ),
+              SliverToBoxAdapter(
+                child: _RelatedProductsSection(product: product),
+              ),
             ],
           );
         },
@@ -175,6 +188,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         data: (product) => _AddToCartBar(
           product: product,
           quantity: _quantity,
+          variant: _selectedVariant,
           onQuantityChanged: (q) => setState(() => _quantity = q),
         ),
         orElse: () => null,
@@ -250,15 +264,183 @@ class _ImageCarousel extends StatelessWidget {
   }
 }
 
+/// Variant (size/shade/pack) selector shown on the product detail page.
+/// Loads variants for the product and renders them as choice chips,
+/// grouped by variantType. Selecting a chip updates price/stock shown
+/// in the add-to-cart bar via the [onSelected] callback.
+///
+/// Renders nothing if the product has no variants, so this is safe to
+/// place unconditionally in the layout for every product.
+class _VariantSelector extends ConsumerWidget {
+  const _VariantSelector({
+    required this.productId,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final int productId;
+  final ProductVariant? selected;
+  final ValueChanged<ProductVariant?> onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final variantsAsync = ref.watch(productVariantsProvider(productId));
+    final theme = Theme.of(context);
+    final brand = context.brand;
+
+    return variantsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (variants) {
+        if (variants.isEmpty) return const SizedBox.shrink();
+
+        // Auto-select a sensible default once variants load, preferring
+        // the first in-stock option so the add-to-cart button isn't
+        // disabled on first render for no reason.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (selected == null) {
+            final firstInStock = variants.where((v) => v.inStock).toList();
+            onSelected(firstInStock.isNotEmpty ? firstInStock.first : variants.first);
+          }
+        });
+
+        // Group by variantType ("size", "shade", "pack"...) so each row
+        // of chips represents one dimension of choice, matching how
+        // most e-commerce PDPs present variants.
+        final byType = <String, List<ProductVariant>>{};
+        for (final v in variants) {
+          byType.putIfAbsent(v.variantType, () => []).add(v);
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final entry in byType.entries) ...[
+                Text(
+                  _labelForVariantType(entry.key),
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final v in entry.value)
+                      ChoiceChip(
+                        label: Text(v.name),
+                        selected: selected?.id == v.id,
+                        onSelected: v.inStock ? (_) => onSelected(v) : null,
+                        disabledColor: theme.disabledColor.withValues(alpha: 0.08),
+                        labelStyle: TextStyle(
+                          color: !v.inStock
+                              ? theme.disabledColor
+                              : selected?.id == v.id
+                                  ? Colors.white
+                                  : null,
+                          decoration: !v.inStock ? TextDecoration.lineThrough : null,
+                        ),
+                        selectedColor: brand.gold,
+                        backgroundColor: theme.cardTheme.color,
+                        side: BorderSide(color: theme.dividerColor),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _labelForVariantType(String variantType) {
+    switch (variantType) {
+      case 'size':
+        return 'Size';
+      case 'shade':
+        return 'Shade';
+      case 'pack':
+        return 'Pack';
+      default:
+        return variantType[0].toUpperCase() + variantType.substring(1);
+    }
+  }
+}
+
+/// "You Might Also Like" — horizontal row of same-category products,
+/// shown beneath reviews/Q&A on the product detail screen.
+class _RelatedProductsSection extends ConsumerWidget {
+  const _RelatedProductsSection({required this.product});
+  final Product product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final relatedAsync = ref.watch(relatedProductsProvider(product));
+    final wishlistIds = ref.watch(wishlistProductIdsProvider);
+    final wishlistNotifier = ref.read(wishlistProvider.notifier);
+    final theme = Theme.of(context);
+
+    return relatedAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (related) {
+        if (related.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text('You Might Also Like', style: theme.textTheme.titleLarge),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 260,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: related.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, i) {
+                    final relatedProduct = related[i];
+                    return SizedBox(
+                      width: 160,
+                      child: StaggeredEntrance(
+                        index: i,
+                        child: ProductCard(
+                          product: relatedProduct,
+                          isWishlisted: wishlistIds.contains(relatedProduct.id),
+                          onWishlistToggle: () =>
+                              wishlistNotifier.toggle(relatedProduct.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _AddToCartBar extends ConsumerStatefulWidget {
   const _AddToCartBar({
     required this.product,
     required this.quantity,
     required this.onQuantityChanged,
+    this.variant,
   });
 
   final Product product;
   final int quantity;
+  final ProductVariant? variant;
   final ValueChanged<int> onQuantityChanged;
 
   @override
@@ -300,6 +482,12 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
     final isAdding = cartState.isLoading;
     final theme = Theme.of(context);
     final product = widget.product;
+    final variant = widget.variant;
+    // The variant's own stock overrides the base product's once one is
+    // selected — a product can be "in stock" overall while the chosen
+    // size/shade specifically is sold out.
+    final effectiveStock = variant?.stock ?? product.stock;
+    final effectiveInStock = variant != null ? variant.inStock : product.inStock;
 
     return SafeArea(
       child: Container(
@@ -312,7 +500,7 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
           children: [
             _QuantityStepper(
               quantity: widget.quantity,
-              max: product.stock,
+              max: effectiveStock,
               onChanged: widget.onQuantityChanged,
             ),
             const SizedBox(width: 12),
@@ -320,13 +508,17 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
               child: ScaleTransition(
                 scale: _scale,
                 child: ElevatedButton(
-                  onPressed: !product.inStock || isAdding
+                  onPressed: !effectiveInStock || isAdding
                       ? null
                       : () async {
                           try {
                             await ref
                                 .read(cartProvider.notifier)
-                                .addItem(product.id, quantity: widget.quantity);
+                                .addItem(
+                                  product.id,
+                                  quantity: widget.quantity,
+                                  variantId: variant?.id,
+                                );
                             if (context.mounted) {
                               setState(() => _justAdded = true);
                               unawaited(_playBounce());
@@ -365,7 +557,7 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
                                 key: const ValueKey('label'),
                                 product.productStatus == 'pre_order'
                                     ? 'Pre-Order Now'
-                                    : product.inStock
+                                    : effectiveInStock
                                         ? 'Add to Cart'
                                         : 'Out of Stock',
                               ),
@@ -378,7 +570,8 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
       ),
     );
   }
-  }
+}
+
 class _QuantityStepper extends StatelessWidget {
   const _QuantityStepper({
     required this.quantity,

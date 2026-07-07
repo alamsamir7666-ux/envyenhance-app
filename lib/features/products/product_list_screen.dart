@@ -4,6 +4,7 @@ import '../../core/theme/app_brand_colors.dart';
 import '../../core/widgets/app_skeleton.dart';
 import '../../core/widgets/async_states.dart';
 import '../../core/widgets/product_card.dart';
+import '../../core/widgets/staggered_entrance.dart';
 import '../wishlist/wishlist_providers.dart';
 import 'product_list_providers.dart';
 
@@ -114,10 +115,13 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                                   );
                                 }
                                 final product = state.products[i];
-                                return ProductCard(
-                                  product: product,
-                                  isWishlisted: wishlistIds.contains(product.id),
-                                  onWishlistToggle: () => wishlistNotifier.toggle(product.id),
+                                return StaggeredEntrance(
+                                  index: i,
+                                  child: ProductCard(
+                                    product: product,
+                                    isWishlisted: wishlistIds.contains(product.id),
+                                    onWishlistToggle: () => wishlistNotifier.toggle(product.id),
+                                  ),
                                 );
                               },
                             ),

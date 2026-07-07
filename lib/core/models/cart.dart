@@ -36,23 +36,76 @@ class CartItem {
     required this.productId,
     required this.quantity,
     required this.product,
+    this.variantId,
+    this.variant,
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
       id: json['id'] as int,
       productId: json['productId'] as int,
+      variantId: json['variantId'] as int?,
       quantity: json['quantity'] as int,
       product: CartProduct.fromJson(json['product'] as Map<String, dynamic>),
+      variant: json['variant'] != null
+          ? CartVariant.fromJson(json['variant'] as Map<String, dynamic>)
+          : null,
     );
   }
 
   final int id;
   final int productId;
+  final int? variantId;
   final int quantity;
   final CartProduct product;
+  final CartVariant? variant;
 
-  double get lineTotal => product.effectivePrice * quantity;
+  /// Prefers the variant's price when this line is for a specific
+  /// variant, falling back to the product price otherwise.
+  double get effectivePrice => variant?.effectivePrice ?? product.effectivePrice;
+
+  double get lineTotal => effectivePrice * quantity;
+
+  /// Display label combining product name with variant, e.g.
+  /// "Rose Clay Mask — 50ml".
+  String get displayName =>
+      variant != null ? '${product.name} — ${variant!.name}' : product.name;
+}
+
+/// Slim variant shape as embedded in a cart line, when this cart item
+/// is for a specific size/shade/pack rather than the base product.
+class CartVariant {
+  CartVariant({
+    required this.id,
+    required this.name,
+    required this.variantType,
+    required this.price,
+    this.discountPrice,
+    required this.stock,
+    this.sku,
+  });
+
+  factory CartVariant.fromJson(Map<String, dynamic> json) {
+    return CartVariant(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      variantType: json['variantType'] as String,
+      price: (json['price'] as num).toDouble(),
+      discountPrice: (json['discountPrice'] as num?)?.toDouble(),
+      stock: json['stock'] as int? ?? 0,
+      sku: json['sku'] as String?,
+    );
+  }
+
+  final int id;
+  final String name;
+  final String variantType;
+  final double price;
+  final double? discountPrice;
+  final int stock;
+  final String? sku;
+
+  double get effectivePrice => discountPrice ?? price;
 }
 
 /// Slimmer product shape as embedded in cart responses (no ratings, etc.)

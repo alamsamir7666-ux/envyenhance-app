@@ -33,22 +33,28 @@ class CartNotifier extends AsyncNotifier<Cart> {
     }
   }
 
-  Future<void> addItem(int productId, {int quantity = 1}) async {
+  Future<void> addItem(int productId, {int quantity = 1, int? variantId}) async {
     final repo = ref.read(cartRepositoryProvider);
     state = const AsyncLoading<Cart>().copyWithPrevious(state);
-    state = await AsyncValue.guard(() => repo.addItem(productId, quantity));
+    state = await AsyncValue.guard(
+      () => repo.addItem(productId, quantity, variantId: variantId),
+    );
   }
 
-  Future<void> updateQuantity(int productId, int quantity) async {
+  Future<void> updateQuantity(int productId, int quantity, {int? variantId}) async {
     final repo = ref.read(cartRepositoryProvider);
     state = const AsyncLoading<Cart>().copyWithPrevious(state);
-    state = await AsyncValue.guard(() => repo.updateQuantity(productId, quantity));
+    state = await AsyncValue.guard(
+      () => repo.updateQuantity(productId, quantity, variantId: variantId),
+    );
   }
 
-  Future<void> removeItem(int productId) async {
+  Future<void> removeItem(int productId, {int? variantId}) async {
     final repo = ref.read(cartRepositoryProvider);
     state = const AsyncLoading<Cart>().copyWithPrevious(state);
-    state = await AsyncValue.guard(() => repo.removeItem(productId));
+    state = await AsyncValue.guard(
+      () => repo.removeItem(productId, variantId: variantId),
+    );
   }
 
   Future<void> clear() async {

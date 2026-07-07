@@ -88,9 +88,10 @@ class ApiClient {
   Future<Response<T>> put<T>(
     String path, {
     Object? data,
+    Map<String, dynamic>? query,
   }) async {
     try {
-      return await _dio.put<T>(path, data: data);
+      return await _dio.put<T>(path, data: data, queryParameters: query);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
@@ -110,9 +111,10 @@ class ApiClient {
   Future<Response<T>> delete<T>(
     String path, {
     Object? data,
+    Map<String, dynamic>? query,
   }) async {
     try {
-      return await _dio.delete<T>(path, data: data);
+      return await _dio.delete<T>(path, data: data, queryParameters: query);
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }

@@ -9,6 +9,7 @@ import '../../core/theme/app_brand_colors.dart';
 import '../../core/widgets/async_states.dart';
 import '../../core/widgets/product_card.dart';
 import '../../core/widgets/section_header.dart';
+import '../../core/widgets/staggered_entrance.dart';
 import '../wishlist/wishlist_providers.dart';
 import 'home_providers.dart';
 
@@ -272,9 +273,12 @@ class _FeaturedTabsSectionState extends ConsumerState<_FeaturedTabsSection> {
                 final product = products[i];
                 return SizedBox(
                   width: 160,
-                  child: ProductCard(
-                    product: product,
-                    isWishlisted: widget.wishlistIds.contains(product.id),
+                  child: StaggeredEntrance(
+                    index: i,
+                    child: ProductCard(
+                      product: product,
+                      isWishlisted: widget.wishlistIds.contains(product.id),
+                    ),
                   ),
                 );
               },
@@ -366,9 +370,12 @@ class _BestByCategorySection extends ConsumerWidget {
                     final product = products[i];
                     return SizedBox(
                       width: 160,
-                      child: ProductCard(
-                        product: product,
-                        isWishlisted: wishlistIds.contains(product.id),
+                      child: StaggeredEntrance(
+                        index: i,
+                        child: ProductCard(
+                          product: product,
+                          isWishlisted: wishlistIds.contains(product.id),
+                        ),
                       ),
                     );
                   },
