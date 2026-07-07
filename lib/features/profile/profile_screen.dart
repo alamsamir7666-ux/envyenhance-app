@@ -136,8 +136,8 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const Divider(height: 32),
               _MenuTile(
-                icon: Icons.location_on_outlined,
-                label: 'Saved Addresses',
+                icon: Icons.local_shipping_outlined,
+                label: 'Track Order',
                 onTap: () => context.push('/track-order'),
               ),
               _MenuTile(
