@@ -378,6 +378,7 @@ class _AddToCartBarState extends ConsumerState<_AddToCartBar>
       ),
     );
   }
+  }
 class _QuantityStepper extends StatelessWidget {
   const _QuantityStepper({
     required this.quantity,
